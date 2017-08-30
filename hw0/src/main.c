@@ -37,6 +37,6 @@ int main(int argc, char const *argv[], char const *envp[]) {
     printf("%s, %s%c\n", hello, "World", '!');
 
     /* End of our program */
-    return 0;
+    return ;
 }
 /* Head over to tests/test.c to see what a unit test looks like */
