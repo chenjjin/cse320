@@ -21,11 +21,19 @@ int main(int argc, char **argv)
 
     mode = validargs(argc, argv);
 
+    /*printf("Success: %d\n", EXIT_SUCCESS);
+    printf("Failure: %d\n", EXIT_FAILURE);*/
+
     debug("Mode: 0x%X", mode);
 
-    if(mode & 0x8000) {
+    if(mode == 0x8000) {
         USAGE(*argv, EXIT_SUCCESS);
     }
+
+    else if (mode == 0x0000){
+        USAGE(*argv, EXIT_FAILURE);
+    }
+
 
     return EXIT_SUCCESS;
 }
