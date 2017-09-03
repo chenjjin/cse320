@@ -216,7 +216,7 @@ unsigned short checkThirdRandC(char **argv) {
         if (firstR == 9){
             firstR = firstR << 4;
             return firstR;
-
+        }
         else{
             unsigned short secondR = (unsigned short)*(*(argv+8)+1) - '0';
             unsigned short totalR = firstR*10 + secondR;
