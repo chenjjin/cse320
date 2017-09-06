@@ -26,13 +26,19 @@ int main(int argc, char **argv)
 
     debug("Mode: 0x%X", mode);
 
+    if (argc == 1){
+        USAGE(*argv, EXIT_FAILURE);
+    }
+
     if(mode == 0x8000) {
         USAGE(*argv, EXIT_SUCCESS);
     }
 
     else if (mode == 0x0000){
-        USAGE(*argv, EXIT_FAILURE);
+        printf("you return a 0\n");
+        USAGE(*argv, EXIT_FAILURE)
     }
+
 
 
     return EXIT_SUCCESS;
@@ -42,3 +48,4 @@ int main(int argc, char **argv)
  * Just a reminder: All non-main functions should
  * be in another file not named main.c
  */
+

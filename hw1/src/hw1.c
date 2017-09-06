@@ -1,4 +1,5 @@
 #include "hw1.h"
+#include <stdlib.h>
 
 #ifdef _STRING_H
 #error "Do not #include <string.h>. You will get a ZERO."
@@ -15,6 +16,15 @@
 unsigned short checkEandD(char **argv);
 unsigned short checkFirstRandC(char **argv);
 unsigned short checkSecondRandC(char **argv);
+unsigned short checkThirdRandC(char **argv);
+int checkNumberRC(int argc,char **argv);
+
+int CheckArgument(int argc,char **argv);
+unsigned short PolyLength(char* polybius_alphabet);
+int rowTimesCol(unsigned short hexNumber,unsigned short totalLength);
+unsigned short PolyLength(char* polybius_alphabet);
+int validPolyKey(char **argv,int position);
+int validFmKey(char **argv,int position);
 
 
 /**
@@ -40,8 +50,9 @@ unsigned short validargs(int argc, char **argv) {
     int flagLeft = argc;
     unsigned short defaultR = 0x00A0;
     unsigned short defaultC = 0x000A;
+    unsigned short polyLength = PolyLength(polybius_alphabet);
 
-    //printf("%s\n", *argv);
+    printf("this is the length:  %x\n ", PolyLength(polybius_alphabet));
     //printf("%c\n", *(*(argv+1)+1));
 
     //check -f flag
@@ -50,7 +61,7 @@ unsigned short validargs(int argc, char **argv) {
         return 0x8000;
     }
     //check the argument length
-    else if (argc <= 1 || argc > 8){
+    else if (argc <= 2 || argc > 9){
         printf("you are fail\n");
         return 0x0000;
     }
@@ -59,63 +70,126 @@ unsigned short validargs(int argc, char **argv) {
         printf("you are fail\n");
         return 0x0000;
     }
+
+    //check argument order
+    else if(CheckArgument(flagLeft,argv)){
+        printf("this is the fault" );
+        return 0x0000;
+    }
+
     //case when p appear
     else if(*(*(argv+1)+1) == 'p'){
+
+        //first check valid row and column
+        if(checkNumberRC(flagLeft,argv)){
+            printf("this is 1\n" );
+            return 0x0000;
+        }
         flagLeft = flagLeft - 3;
         shortvalue = 0x0000;
         shortvalue = shortvalue | checkEandD(argv);
 
         if (flagLeft == 0){
+             printf("this is 99\n" );
+
             shortvalue = shortvalue | 0x00AA;
-        printf("%x\n", shortvalue);
+            if (rowTimesCol(shortvalue,polyLength)){
+                return 0x0000;
+            }
+            printf("\nthis is return code: %x\n",shortvalue);
             return shortvalue;
         }
 
         // add first -r -c -k
         shortvalue = shortvalue | checkFirstRandC(argv);
         flagLeft = flagLeft - 2;
+        int Rexist = 0;
+        int Cexist = 0;
+        if (*(*(argv+3)+1) == 'r'){
+             Rexist = 1;
+        }
+        else if(*(*(argv+3)+1) == 'c'){
+             Cexist = 1;
+        }
         if(flagLeft == 0){
             if (*(*(argv+3)+1) == 'r'){
                 shortvalue = shortvalue | defaultC;
-                printf("%x\n come on ,please come", shortvalue );
+                printf("%x\n come on ,please come1", shortvalue );
+                if (rowTimesCol(shortvalue,polyLength)){
+                    return 0x0000;
+                }
+            printf("\nthis is return code: %x\n",shortvalue);
+
                 return shortvalue;
             }
             else if (*(*(argv+3)+1) == 'c'){
                 shortvalue = shortvalue | defaultR;
+                if (rowTimesCol(shortvalue,polyLength)){
+                    return 0x0000;
+                }
                 return shortvalue;
             }
 
             else{
+                shortvalue = shortvalue | 0x00AA;
+                 printf("this is 100\n" );
+                 if (rowTimesCol(shortvalue,polyLength)){
+                    return 0x0000;
+                }
+                if(validPolyKey(argv,4)){
+                    return 0x0000;
+                }
+
+                printf("key: %c\n",*key );
                 return shortvalue;
             }
         }
 
         //add second -r -c -k
-        shortvalue = shortvalue | checkFirstRandC(argv);
+        shortvalue = shortvalue | checkSecondRandC(argv);
         flagLeft = flagLeft - 2;
         if(flagLeft == 0){
             if (*(*(argv+5)+1) == 'r'){
-                printf("%x\n come on ,please come", shortvalue );
+                printf("%x\n come on ,please come2", shortvalue );
+                if (rowTimesCol(shortvalue,polyLength)){
+                    return 0x0000;
+                }
                 return shortvalue;
             }
             else if (*(*(argv+5)+1) == 'c'){
+                printf("\nshortvalue:%x\n",shortvalue);
+                 if (rowTimesCol(shortvalue,polyLength)){
+                    return 0x0000;
+                }
+
                 return shortvalue;
             }
             else{
+                if (Cexist){
+                    shortvalue = shortvalue | 0x00A0;
+                }
+                if (Rexist){
+                    shortvalue = shortvalue | 0x000A;
+                }
+                if (rowTimesCol(shortvalue,polyLength)){
+                    return 0x0000;
+                }
+                if(validPolyKey(argv,4)){
+                    return 0x0000;
+                }
                 return shortvalue;
             }
 
         }
 
         //add third -r -c -k
-        shortvalue = shortvalue | checkFirstRandC(argv);
-        if (*(*(argv+5)+1) == 'r'){
-                printf("%x\n come on ,please come", shortvalue );
-                return shortvalue;
-            }
-            else if (*(*(argv+5)+1) == 'c'){
-                return shortvalue;
-            }
+        shortvalue = shortvalue | checkThirdRandC(argv);
+        if (rowTimesCol(shortvalue,polyLength)){
+            return 0x0000;
+        }
+        if(validPolyKey(argv,4)){
+            return 0x0000;
+        }
         return shortvalue;
         printf("%x\n", shortvalue);
     }
@@ -125,6 +199,12 @@ unsigned short validargs(int argc, char **argv) {
         shortvalue = 0x4000;
         shortvalue = shortvalue | checkEandD(argv);
                 printf("%x\n", shortvalue);
+        if (argc == 5){
+            if(validFmKey(argv,4)){
+                return 0x0000;
+            }
+        }
+        key = *(argv + 4);
         return shortvalue;
         }
 
@@ -155,7 +235,6 @@ unsigned short checkFirstRandC(char **argv) {
             unsigned short secondR = (unsigned short)*(*(argv+4)+1) - '0';
             unsigned short totalR = firstR*10 + secondR;
             totalR = totalR << 4;
-            printf("%x\n now \n", totalR );
             return totalR;
         }
     }
@@ -168,7 +247,6 @@ unsigned short checkFirstRandC(char **argv) {
         else{
             unsigned short secondC = (unsigned short)*(*(argv+4)+1) - '0';
             unsigned short totalC = firstC*10 + secondC;
-            printf("%x\n come on ,please come", totalC );
             return totalC;
         }
     }
@@ -201,7 +279,7 @@ unsigned short checkSecondRandC(char **argv) {
         else{
             unsigned short secondC = (unsigned short)*(*(argv+6)+1) - '0';
             unsigned short totalC = firstC*10 + secondC;
-            printf("%x\n come on ,please come", totalC );
+            printf("%x\n come on ,please come3", totalC );
             return totalC;
         }
     }
@@ -234,11 +312,290 @@ unsigned short checkThirdRandC(char **argv) {
         else{
             unsigned short secondC = (unsigned short)*(*(argv+8)+1) - '0';
             unsigned short totalC = firstC*10 + secondC;
-            printf("%x\n come on ,please come", totalC );
+            printf("%x\n come on ,please come4", totalC );
             return totalC;
         }
     }
     else{
         return 0x0000;
     }
+}
+
+//Incorrect arguments for the specified cipher (e.g. -r or -c being passed in with -f)
+//also check if the third argument is -d or -e
+int CheckArgument(int argc,char **argv){
+
+
+    if (argc < 2){
+        return 1;
+    }
+
+    if(*(*(argv+1)+1) == 'f'){
+        if (*(*(argv+2)+1) != 'e' && *(*(argv+2)+1) != 'd' ){
+            return 1 ;
+        }
+
+        if (argc == 3){
+            return 0;
+
+         }
+
+        if(*(*(argv+3)+1) == 'r' || *(*(argv+3)+1) == 'c'){
+            return 1;
+
+        }
+
+    }
+
+
+    return 0;
+
+}
+
+//The number of rows or columns is invalid (i.e. more than 16 or less than 9)
+int checkNumberRC(int argc,char **argv){
+    if (argc == 3){
+        return 0;
+    }
+    argc = argc -5;
+    if(*(*(argv+3)+1) == 'r'){
+        unsigned short firstR = (unsigned short)**(argv+4) - '0';
+        if (firstR != 9 && firstR!= 1){
+            return 1;
+        }
+        if (firstR == 9){
+            return 0;
+        }
+        else{
+            unsigned short secondR = (unsigned short)*(*(argv+4)+1) - '0';
+            if(secondR > 6){
+                return 1;
+            }
+        }
+    }
+    //check for -c
+    else if(*(*(argv+3)+1) == 'c'){
+       unsigned short firstC = (unsigned short)**(argv+4) - '0';
+        if (firstC != 9 && firstC != 1){
+            return 1;
+        }
+        if (firstC == 9){
+            return 0;
+        }
+        else{
+            unsigned short secondC = (unsigned short)*(*(argv+4)+1) - '0';
+            if (secondC > 6){
+                return 1;
+            }
+        }
+    }
+
+    if (argc==0){
+
+        return 0;
+    }
+// second r and c check
+    argc = argc - 2;
+
+    if(*(*(argv+5)+1) == 'r'){
+        unsigned short firstR = (unsigned short)**(argv+6) - '0';
+        if (firstR != 9 && firstR!= 1){
+            return 1;
+        }
+        if (firstR == 9){
+            return 0;
+        }
+        else{
+            unsigned short secondR = (unsigned short)*(*(argv+6)+1) - '0';
+            if(secondR > 6){
+                return 1;
+            }
+        }
+    }
+    //check for -c
+    else if(*(*(argv+5)+1) == 'c'){
+       unsigned short firstC = (unsigned short)**(argv+6) - '0';
+        if (firstC != 9 && firstC != 1){
+            return 1;
+        }
+        if (firstC == 9){
+            return 0;
+        }
+        else{
+            unsigned short secondC = (unsigned short)*(*(argv+6)+1) - '0';
+            if (secondC > 6){
+                return 1;
+            }
+        }
+    }
+
+    if (argc == 0){
+        return 0;
+    }
+
+    // third r and c check
+
+    if(*(*(argv+7)+1) == 'r'){
+        unsigned short firstR = (unsigned short)**(argv+8) - '0';
+        if (firstR != 9 && firstR!= 1){
+            return 1;
+        }
+        if (firstR == 9){
+            return 0;
+        }
+        else{
+            unsigned short secondR = (unsigned short)*(*(argv+8)+1) - '0';
+            if(secondR > 6){
+                return 1;
+            }
+        }
+    }
+    //check for -c
+    else if(*(*(argv+7)+1) == 'c'){
+       unsigned short firstC = (unsigned short)**(argv+8) - '0';
+        if (firstC != 9 && firstC != 1){
+            return 1;
+        }
+        if (firstC == 9){
+            return 0;
+        }
+        else{
+            unsigned short secondC = (unsigned short)*(*(argv+8)+1) - '0';
+            if (secondC > 6){
+                return 1;
+            }
+        }
+    }
+
+
+    return 0;
+
+}
+
+// length of the polybius_alphabet
+unsigned short PolyLength(char* polybius_alphabet){
+    int length = 0;
+    char* character = polybius_alphabet;
+    while(*character!='\0'){
+        //printf("%c\n",*character );
+        character++;
+        length++;
+    }
+    return (unsigned short)length;
+}
+
+
+int rowTimesCol(unsigned short hexNumber,unsigned short totalLength){
+    unsigned short lastDigit= hexNumber & 0x0F;
+    unsigned short SecondlastDigit= hexNumber & 0xF0;
+    SecondlastDigit = SecondlastDigit >> 4;
+    unsigned short multiple= lastDigit * SecondlastDigit;
+    //printf("second digit :  %x\n",SecondlastDigit );
+    printf("wrong r and c:%d\n",multiple);
+    if (multiple < totalLength ){
+         return 1;
+    }
+    return 0;
+}
+
+int validPolyKey(char **argv,int position){
+    int positionPlus = 0;
+    int positionPLusPLus = 1;
+    int polyPosition = 0;
+    int istrue = 0;
+    char* pPointer = polybius_alphabet;
+
+    // printf("first: %c\n",*(*(argv + position)+positionPlus ));
+
+    while(*(*(argv + position)+positionPlus) != '\0'){
+        pPointer = polybius_alphabet;
+        while( *pPointer != '\0'  && istrue == 0){
+            if (*(*(argv + position)+positionPlus) == *pPointer){
+                istrue = 1;
+            }
+            else{
+                pPointer++;
+            }
+
+        }
+        if (istrue == 0){
+            return 1;
+        }
+        else {
+            istrue = 0;
+            positionPlus++;
+        }
+    }
+
+    istrue = 0;
+    positionPlus = 0;
+
+    while (*(*(argv + position)+positionPlus) != '\0'){
+        positionPLusPLus = 1;
+        while(*(*(argv + position) + positionPlus + positionPLusPLus) != '\0'){
+            printf("%d\n",*(*(argv + position) + positionPlus + positionPLusPLus ));
+            if (*(*(argv + position)+positionPlus) == *(*(argv + position)+positionPlus+positionPLusPLus) ){
+
+                return 1;
+            }
+            else{
+                positionPLusPLus++;
+            }
+        }
+        positionPlus++;
+    }
+    key = *(argv + position);
+
+    return 0;
+}
+
+
+int validFmKey(char **argv,int position){
+    int positionPlus = 0;
+    int positionPLusPLus = 1;
+    int polyPosition = 0;
+    int istrue = 0;
+    const char* pPointer = fm_alphabet;
+
+    // printf("first: %c\n",*(*(argv + position)+positionPlus ));
+
+    while(*(*(argv + position)+positionPlus) != '\0'){
+        pPointer = fm_alphabet;
+        while( *pPointer != '\0'  && istrue == 0){
+            if (*(*(argv + position)+positionPlus) == *pPointer){
+                istrue = 1;
+            }
+            else{
+                pPointer++;
+            }
+
+        }
+        if (istrue == 0){
+            return 1;
+        }
+        else {
+            istrue = 0;
+            positionPlus++;
+        }
+    }
+
+    istrue = 0;
+    positionPlus = 0;
+
+    while (*(*(argv + position)+positionPlus) != '\0'){
+        positionPLusPLus = 1;
+        while(*(*(argv + position) + positionPlus + positionPLusPLus) != '\0'){
+            printf("%d\n",*(*(argv + position) + positionPlus + positionPLusPLus ));
+            if (*(*(argv + position)+positionPlus) == *(*(argv + position)+positionPlus+positionPLusPLus) ){
+
+                return 1;
+            }
+            else{
+                positionPLusPLus++;
+            }
+        }
+        positionPlus++;
+    }
+
+    return 0;
 }
