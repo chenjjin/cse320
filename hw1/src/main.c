@@ -36,7 +36,7 @@ int main(int argc, char **argv)
 
     else if (mode == 0x0000){
         printf("you return a 0\n");
-        USAGE(*argv, EXIT_FAILURE)
+        USAGE(*argv, EXIT_FAILURE);
     }
 
 
