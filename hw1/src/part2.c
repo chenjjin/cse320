@@ -18,13 +18,19 @@ unsigned short rowValue(unsigned short mode);
 unsigned short counterPosition(char c,char* array,unsigned short mode);
 void encrypt(unsigned short col,unsigned short row,unsigned short position);
 void putmoreArray(char* array,char* poly_alpha,const char *key);
+unsigned short findPosition(unsigned short col, char firstNumber,char secondNumber);
+void decrept(char *array ,unsigned short postion);
 
 
 
 
 void try(unsigned short mode){
     char c;
+    char d;
     printf("key value:%s\n",key );
+    unsigned short type = mode >> 13;
+    type = type & 0x0001;
+    printf("value type%x\n",type );
     if(key == NULL){
         putArray(polybius_table,polybius_alphabet);
     }
@@ -47,8 +53,15 @@ void try(unsigned short mode){
             else if (c == '\t'){
                 break;
             }
-            unsigned char position = counterPosition( c, polybius_table,mode);
-            encrypt(colValue(mode),rowValue(mode),position);
+            if(!type){
+                unsigned char position = counterPosition( c, polybius_table,mode);
+                encrypt(colValue(mode),rowValue(mode),position);
+            }
+            else{
+                d = getchar();
+                unsigned char positon = findPosition(colValue(mode),c,d);
+                decrept(polybius_table,positon);
+            }
 
             c = getchar();
         }
@@ -133,6 +146,28 @@ unsigned short counterPosition(char c,char* array,unsigned short mode){
     return position;
 }
 
+unsigned short findPosition(unsigned short col, char firstNumber,char secondNumber){
+    unsigned short position = 0;
+    unsigned short one;
+    unsigned short two;
+    if (firstNumber > 64){
+        one = firstNumber - 55;
+    }
+    else{
+        one = firstNumber - 48;
+    }
+    if(secondNumber > 64){
+        two = secondNumber - 55;
+    }
+    else{
+        two = secondNumber - 48;
+    }
+    position = one * col + two;
+    // printf("decrept position : %u\n",position);
+    return position;
+
+}
+
 void encrypt(unsigned short col,unsigned short row, unsigned short position){
 
     unsigned short quotient = position / col;
@@ -156,4 +191,12 @@ void encrypt(unsigned short col,unsigned short row, unsigned short position){
     printf("%c%c",quo,rem );
 
 
+}
+
+void decrept(char *array ,unsigned short position){
+    while(position != 0){
+        array ++;
+        position--;
+    }
+    printf("%c",*array );
 }
