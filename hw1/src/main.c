@@ -2,6 +2,7 @@
 
 #include "hw1.h"
 #include "debug.h"
+#include "part2.h"
 
 #ifdef _STRING_H
 #error "Do not #include <string.h>. You will get a ZERO."
@@ -39,7 +40,8 @@ int main(int argc, char **argv)
         USAGE(*argv, EXIT_FAILURE);
     }
 
-
+    printf("this is key: %s\n",key );
+    try(mode);
 
     return EXIT_SUCCESS;
 }

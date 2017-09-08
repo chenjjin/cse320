@@ -103,13 +103,13 @@ unsigned short validargs(int argc, char **argv) {
         // add first -r -c -k
         shortvalue = shortvalue | checkFirstRandC(argv);
         flagLeft = flagLeft - 2;
-        int Rexist = 0;
-        int Cexist = 0;
+        int Rexist = 1;
+        int Cexist = 1;
         if (*(*(argv+3)+1) == 'r'){
-             Rexist = 1;
+             Rexist = 0;
         }
         else if(*(*(argv+3)+1) == 'c'){
-             Cexist = 1;
+             Cexist = 0;
         }
         if(flagLeft == 0){
             if (*(*(argv+3)+1) == 'r'){
@@ -140,8 +140,13 @@ unsigned short validargs(int argc, char **argv) {
                     return 0x0000;
                 }
 
-                printf("key: %c\n",*key );
+                printf("key1: %c\n",*key );
                 return shortvalue;
+            }
+        }
+        if (*(*(argv+3)+1) == 'k'){
+            if(validPolyKey(argv,4)){
+                return 0x0000;
             }
         }
 
@@ -149,14 +154,26 @@ unsigned short validargs(int argc, char **argv) {
         shortvalue = shortvalue | checkSecondRandC(argv);
         flagLeft = flagLeft - 2;
         if(flagLeft == 0){
+
+
             if (*(*(argv+5)+1) == 'r'){
+                if (Cexist){
+                    printf("cis no here\n");
+                    shortvalue = shortvalue | 0x000A;
+                }
                 printf("%x\n come on ,please come2", shortvalue );
+                printf("this is short value: %x\n",shortvalue );
                 if (rowTimesCol(shortvalue,polyLength)){
+                    printf("here1");
                     return 0x0000;
                 }
                 return shortvalue;
             }
             else if (*(*(argv+5)+1) == 'c'){
+                if (Rexist){
+
+                    shortvalue = shortvalue | 0x00A0;
+                }
                 printf("\nshortvalue:%x\n",shortvalue);
                  if (rowTimesCol(shortvalue,polyLength)){
                     return 0x0000;
@@ -166,20 +183,26 @@ unsigned short validargs(int argc, char **argv) {
             }
             else{
                 if (Cexist){
-                    shortvalue = shortvalue | 0x00A0;
+                    shortvalue = shortvalue | 0x000A;
                 }
                 if (Rexist){
-                    shortvalue = shortvalue | 0x000A;
+                    shortvalue = shortvalue | 0x00A0;
                 }
                 if (rowTimesCol(shortvalue,polyLength)){
                     return 0x0000;
                 }
-                if(validPolyKey(argv,4)){
+                if(validPolyKey(argv,6)){
                     return 0x0000;
                 }
+                printf("key2: %c\n",*key );
                 return shortvalue;
             }
 
+        }
+        if (*(*(argv+5)+1) == 'k'){
+            if(validPolyKey(argv,6)){
+                return 0x0000;
+            }
         }
 
         //add third -r -c -k
@@ -187,9 +210,12 @@ unsigned short validargs(int argc, char **argv) {
         if (rowTimesCol(shortvalue,polyLength)){
             return 0x0000;
         }
-        if(validPolyKey(argv,4)){
-            return 0x0000;
+        if (*(*(argv+7)+1) == 'k'){
+            if(validPolyKey(argv,8)){
+                return 0x0000;
+            }
         }
+        printf("key3: %c\n",*key );
         return shortvalue;
         printf("%x\n", shortvalue);
     }
@@ -545,6 +571,7 @@ int validPolyKey(char **argv,int position){
         positionPlus++;
     }
     key = *(argv + position);
+    printf("key is here: %s\n",key );
 
     return 0;
 }
