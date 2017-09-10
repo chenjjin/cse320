@@ -24,7 +24,7 @@ void decrept(char *array ,unsigned short postion);
 
 
 
-void try(unsigned short mode){
+void tryPART2(unsigned short mode){
     char c;
     char d;
     printf("key value:%s\n",key );

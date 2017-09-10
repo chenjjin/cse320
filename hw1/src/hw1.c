@@ -222,6 +222,7 @@ unsigned short validargs(int argc, char **argv) {
     //case when f appear
     else if(*(*(argv+1)+1) == 'f'){
         //flagLeft = flagLeft - 3;
+        // printf("f aaaaaaa\n" );
         shortvalue = 0x4000;
         shortvalue = shortvalue | checkEandD(argv);
                 printf("%x\n", shortvalue);
@@ -229,8 +230,9 @@ unsigned short validargs(int argc, char **argv) {
             if(validFmKey(argv,4)){
                 return 0x0000;
             }
-        }
         key = *(argv + 4);
+        }
+
         return shortvalue;
         }
 
@@ -559,7 +561,7 @@ int validPolyKey(char **argv,int position){
     while (*(*(argv + position)+positionPlus) != '\0'){
         positionPLusPLus = 1;
         while(*(*(argv + position) + positionPlus + positionPLusPLus) != '\0'){
-            printf("%d\n",*(*(argv + position) + positionPlus + positionPLusPLus ));
+            // printf("%d\n",*(*(argv + position) + positionPlus + positionPLusPLus ));
             if (*(*(argv + position)+positionPlus) == *(*(argv + position)+positionPlus+positionPLusPLus) ){
 
                 return 1;
@@ -612,7 +614,7 @@ int validFmKey(char **argv,int position){
     while (*(*(argv + position)+positionPlus) != '\0'){
         positionPLusPLus = 1;
         while(*(*(argv + position) + positionPlus + positionPLusPLus) != '\0'){
-            printf("%d\n",*(*(argv + position) + positionPlus + positionPLusPLus ));
+            // printf("%d\n",*(*(argv + position) + positionPlus + positionPLusPLus ));
             if (*(*(argv + position)+positionPlus) == *(*(argv + position)+positionPlus+positionPLusPLus) ){
 
                 return 1;

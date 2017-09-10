@@ -5,4 +5,4 @@
 
 #endif
 
-void try(unsigned short mode);
+void tryPART2(unsigned short mode);

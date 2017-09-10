@@ -19,6 +19,7 @@
 int main(int argc, char **argv)
 {
     unsigned short mode;
+    unsigned short modeRepl;
 
     mode = validargs(argc, argv);
 
@@ -41,7 +42,16 @@ int main(int argc, char **argv)
     }
 
     printf("this is key: %s\n",key );
-    try(mode);
+
+    modeRepl = mode >> 14;
+    modeRepl = modeRepl & 0x01;
+    printf("modeRepl:%x\n",modeRepl);
+    if(modeRepl == 0){
+        tryPART2(mode);
+    }
+    else{
+        tryPART3(mode);
+    }
 
     return EXIT_SUCCESS;
 }
