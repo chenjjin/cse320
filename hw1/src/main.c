@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 
     debug("Mode: 0x%X", mode);
 
-        printf("this is return value: %x\n",mode );
+        // printf("this is return value: %x\n",mode );
 
 
     if (argc == 1){
