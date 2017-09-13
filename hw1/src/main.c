@@ -3,6 +3,8 @@
 #include "hw1.h"
 #include "debug.h"
 #include "part2.h"
+#include "part3.h"
+
 
 #ifdef _STRING_H
 #error "Do not #include <string.h>. You will get a ZERO."
@@ -28,6 +30,9 @@ int main(int argc, char **argv)
 
     debug("Mode: 0x%X", mode);
 
+        printf("this is return value: %x\n",mode );
+
+
     if (argc == 1){
         USAGE(*argv, EXIT_FAILURE);
     }
@@ -37,15 +42,12 @@ int main(int argc, char **argv)
     }
 
     else if (mode == 0x0000){
-        printf("you return a 0\n");
         USAGE(*argv, EXIT_FAILURE);
     }
 
-    printf("this is key: %s\n",key );
 
     modeRepl = mode >> 14;
     modeRepl = modeRepl & 0x01;
-    printf("modeRepl:%x\n",modeRepl);
     if(modeRepl == 0){
         tryPART2(mode);
     }

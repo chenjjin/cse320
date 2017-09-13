@@ -43,37 +43,34 @@ int validFmKey(char **argv,int position);
  */
 unsigned short validargs(int argc, char **argv) {
 
-    char f = 'f';
-    char h = 'h';
-    char p = 'p';
     unsigned short shortvalue;
     int flagLeft = argc;
     unsigned short defaultR = 0x00A0;
     unsigned short defaultC = 0x000A;
     unsigned short polyLength = PolyLength(polybius_alphabet);
 
-    printf("this is the length:  %x\n ", PolyLength(polybius_alphabet));
+    // printf("this is the length:  %x\n ", PolyLength(polybius_alphabet));
     //printf("%c\n", *(*(argv+1)+1));
 
     //check -f flag
-    if ( (argc != 1) && (*(*(argv+1)+1) == h)){
-        printf("you are good\n");
+    if ( (argc != 1) && (*(*(argv+1)+1) == 'h')){
+        // printf("you are good\n");
         return 0x8000;
     }
     //check the argument length
     else if (argc <= 2 || argc > 9){
-        printf("you are fail\n");
+        // printf("you are fail\n");
         return 0x0000;
     }
     //check if  start with p and f
-    else if(*(*(argv+1)+1) != p && *(*(argv+1)+1) !=f){
-        printf("you are fail\n");
+    else if(*(*(argv+1)+1) != 'p' && *(*(argv+1)+1) !='f'){
+        // printf("you are fail\n");
         return 0x0000;
     }
 
     //check argument order
     else if(CheckArgument(flagLeft,argv)){
-        printf("this is the fault" );
+        // printf("this is the fault" );
         return 0x0000;
     }
 
@@ -82,25 +79,31 @@ unsigned short validargs(int argc, char **argv) {
 
         //first check valid row and column
         if(checkNumberRC(flagLeft,argv)){
-            printf("this is 1\n" );
+            // printf("this is 1\n" );
             return 0x0000;
         }
         flagLeft = flagLeft - 3;
         shortvalue = 0x0000;
+        if(checkEandD(argv) == 0xffff){
+            return 0x0000;
+        }
         shortvalue = shortvalue | checkEandD(argv);
 
         if (flagLeft == 0){
-             printf("this is 99\n" );
+             // printf("this is 99\n" );
 
             shortvalue = shortvalue | 0x00AA;
             if (rowTimesCol(shortvalue,polyLength)){
                 return 0x0000;
             }
-            printf("\nthis is return code: %x\n",shortvalue);
+            // printf("\nthis is return code: %x\n",shortvalue);
             return shortvalue;
         }
 
         // add first -r -c -k
+        if(*(*(argv+3)+1) != 'r' && *(*(argv+3)+1) != 'c' && *(*(argv+3)+1) != 'k'){
+            return 0x0000;
+        }
         shortvalue = shortvalue | checkFirstRandC(argv);
         flagLeft = flagLeft - 2;
         int Rexist = 1;
@@ -114,11 +117,11 @@ unsigned short validargs(int argc, char **argv) {
         if(flagLeft == 0){
             if (*(*(argv+3)+1) == 'r'){
                 shortvalue = shortvalue | defaultC;
-                printf("%x\n come on ,please come1", shortvalue );
+                // printf("%x\n come on ,please come1", shortvalue );
                 if (rowTimesCol(shortvalue,polyLength)){
                     return 0x0000;
                 }
-            printf("\nthis is return code: %x\n",shortvalue);
+            // printf("\nthis is return code: %x\n",shortvalue);
 
                 return shortvalue;
             }
@@ -132,7 +135,7 @@ unsigned short validargs(int argc, char **argv) {
 
             else{
                 shortvalue = shortvalue | 0x00AA;
-                 printf("this is 100\n" );
+                 // printf("this is 100\n" );
                  if (rowTimesCol(shortvalue,polyLength)){
                     return 0x0000;
                 }
@@ -140,7 +143,7 @@ unsigned short validargs(int argc, char **argv) {
                     return 0x0000;
                 }
 
-                printf("key1: %c\n",*key );
+                // printf("key1: %c\n",*key );
                 return shortvalue;
             }
         }
@@ -151,6 +154,9 @@ unsigned short validargs(int argc, char **argv) {
         }
 
         //add second -r -c -k
+        if(*(*(argv+5)+1) != 'r' && *(*(argv+5)+1) != 'c' && *(*(argv+5)+1) != 'k'){
+            return 0x0000;
+        }
         shortvalue = shortvalue | checkSecondRandC(argv);
         flagLeft = flagLeft - 2;
         if(flagLeft == 0){
@@ -158,13 +164,13 @@ unsigned short validargs(int argc, char **argv) {
 
             if (*(*(argv+5)+1) == 'r'){
                 if (Cexist){
-                    printf("cis no here\n");
+                    // printf("cis no here\n");
                     shortvalue = shortvalue | 0x000A;
                 }
-                printf("%x\n come on ,please come2", shortvalue );
-                printf("this is short value: %x\n",shortvalue );
+                // printf("%x\n come on ,please come2", shortvalue );
+                // printf("this is short value: %x\n",shortvalue );
                 if (rowTimesCol(shortvalue,polyLength)){
-                    printf("here1");
+                    // printf("here1");
                     return 0x0000;
                 }
                 return shortvalue;
@@ -174,7 +180,7 @@ unsigned short validargs(int argc, char **argv) {
 
                     shortvalue = shortvalue | 0x00A0;
                 }
-                printf("\nshortvalue:%x\n",shortvalue);
+                // printf("\nshortvalue:%x\n",shortvalue);
                  if (rowTimesCol(shortvalue,polyLength)){
                     return 0x0000;
                 }
@@ -194,7 +200,7 @@ unsigned short validargs(int argc, char **argv) {
                 if(validPolyKey(argv,6)){
                     return 0x0000;
                 }
-                printf("key2: %c\n",*key );
+                // printf("key2: %c\n",*key );
                 return shortvalue;
             }
 
@@ -206,6 +212,9 @@ unsigned short validargs(int argc, char **argv) {
         }
 
         //add third -r -c -k
+        if(*(*(argv+7)+1) != 'r' && *(*(argv+7)+1) != 'c' && *(*(argv+7)+1) != 'k'){
+            return 0x0000;
+        }
         shortvalue = shortvalue | checkThirdRandC(argv);
         if (rowTimesCol(shortvalue,polyLength)){
             return 0x0000;
@@ -215,17 +224,20 @@ unsigned short validargs(int argc, char **argv) {
                 return 0x0000;
             }
         }
-        printf("key3: %c\n",*key );
+        // printf("key3: %c\n",*key );
         return shortvalue;
-        printf("%x\n", shortvalue);
+        // printf("%x\n", shortvalue);
     }
     //case when f appear
     else if(*(*(argv+1)+1) == 'f'){
         //flagLeft = flagLeft - 3;
         // printf("f aaaaaaa\n" );
         shortvalue = 0x4000;
+        if(checkEandD(argv) == 0xffff){
+            return 0x0000;
+        }
         shortvalue = shortvalue | checkEandD(argv);
-                printf("%x\n", shortvalue);
+                // printf("%x\n", shortvalue);
         if (argc == 5){
             if(validFmKey(argv,4)){
                 return 0x0000;
@@ -247,8 +259,11 @@ unsigned short checkEandD(char **argv) {
         return 0x0000;
     }
     //check for -d
-    else {
+    else if(*(*(argv+2)+1) == 'd'){
         return 0x2000;
+    }
+    else{
+        return 0xffff;
     }
 }
 
@@ -294,7 +309,7 @@ unsigned short checkSecondRandC(char **argv) {
             unsigned short secondR = (unsigned short)*(*(argv+6)+1) - '0';
             unsigned short totalR = firstR*10 + secondR;
             totalR = totalR << 4;
-            printf("%x\n now \n", totalR );
+            // printf("%x\n now \n", totalR );
             return totalR;
         }
     }
@@ -307,7 +322,7 @@ unsigned short checkSecondRandC(char **argv) {
         else{
             unsigned short secondC = (unsigned short)*(*(argv+6)+1) - '0';
             unsigned short totalC = firstC*10 + secondC;
-            printf("%x\n come on ,please come3", totalC );
+            // printf("%x\n come on ,please come3", totalC );
             return totalC;
         }
     }
@@ -327,7 +342,7 @@ unsigned short checkThirdRandC(char **argv) {
             unsigned short secondR = (unsigned short)*(*(argv+8)+1) - '0';
             unsigned short totalR = firstR*10 + secondR;
             totalR = totalR << 4;
-            printf("%x\n now \n", totalR );
+            // printf("%x\n now \n", totalR );
             return totalR;
         }
     }
@@ -340,7 +355,7 @@ unsigned short checkThirdRandC(char **argv) {
         else{
             unsigned short secondC = (unsigned short)*(*(argv+8)+1) - '0';
             unsigned short totalC = firstC*10 + secondC;
-            printf("%x\n come on ,please come4", totalC );
+            // printf("%x\n come on ,please come4", totalC );
             return totalC;
         }
     }
@@ -391,11 +406,17 @@ int checkNumberRC(int argc,char **argv){
         if (firstR != 9 && firstR!= 1){
             return 1;
         }
-        if (firstR == 9){
+        if (firstR == 9 ){
+            if(*(*(argv+4)+1) != '\0'){
+                return 1;
+            }
             return 0;
         }
         else{
             unsigned short secondR = (unsigned short)*(*(argv+4)+1) - '0';
+            if((unsigned short)*(*(argv+4)+2)!='\0'){
+                return 1;
+            }
             if(secondR > 6){
                 return 1;
             }
@@ -408,10 +429,16 @@ int checkNumberRC(int argc,char **argv){
             return 1;
         }
         if (firstC == 9){
+            if(*(*(argv+4)+1) != '\0'){
+                return 1;
+            }
             return 0;
         }
         else{
             unsigned short secondC = (unsigned short)*(*(argv+4)+1) - '0';
+            if((unsigned short)*(*(argv+4)+2)!='\0'){
+                return 1;
+            }
             if (secondC > 6){
                 return 1;
             }
@@ -431,10 +458,16 @@ int checkNumberRC(int argc,char **argv){
             return 1;
         }
         if (firstR == 9){
+            if(*(*(argv+6)+1) != '\0'){
+                return 1;
+            }
             return 0;
         }
         else{
             unsigned short secondR = (unsigned short)*(*(argv+6)+1) - '0';
+            if((unsigned short)*(*(argv+6)+2)!='\0'){
+                return 1;
+            }
             if(secondR > 6){
                 return 1;
             }
@@ -447,10 +480,16 @@ int checkNumberRC(int argc,char **argv){
             return 1;
         }
         if (firstC == 9){
+            if(*(*(argv+6)+1) != '\0'){
+                return 1;
+            }
             return 0;
         }
         else{
             unsigned short secondC = (unsigned short)*(*(argv+6)+1) - '0';
+            if((unsigned short)*(*(argv+6)+2)!='\0'){
+                return 1;
+            }
             if (secondC > 6){
                 return 1;
             }
@@ -468,11 +507,17 @@ int checkNumberRC(int argc,char **argv){
         if (firstR != 9 && firstR!= 1){
             return 1;
         }
-        if (firstR == 9){
+        if (firstR == 9 ){
+            if(*(*(argv+8)+1) != '\0'){
+                return 1;
+            }
             return 0;
         }
         else{
             unsigned short secondR = (unsigned short)*(*(argv+8)+1) - '0';
+            if((unsigned short)*(*(argv+8)+2)!='\0'){
+                return 1;
+            }
             if(secondR > 6){
                 return 1;
             }
@@ -485,10 +530,16 @@ int checkNumberRC(int argc,char **argv){
             return 1;
         }
         if (firstC == 9){
+            if(*(*(argv+8)+1) != '\0'){
+                return 1;
+            }
             return 0;
         }
         else{
             unsigned short secondC = (unsigned short)*(*(argv+8)+1) - '0';
+            if((unsigned short)*(*(argv+8)+2)!='\0'){
+                return 1;
+            }
             if (secondC > 6){
                 return 1;
             }
@@ -519,7 +570,7 @@ int rowTimesCol(unsigned short hexNumber,unsigned short totalLength){
     SecondlastDigit = SecondlastDigit >> 4;
     unsigned short multiple= lastDigit * SecondlastDigit;
     //printf("second digit :  %x\n",SecondlastDigit );
-    printf("wrong r and c:%d\n",multiple);
+    // printf("wrong r and c:%d\n",multiple);
     if (multiple < totalLength ){
          return 1;
     }
@@ -573,7 +624,7 @@ int validPolyKey(char **argv,int position){
         positionPlus++;
     }
     key = *(argv + position);
-    printf("key is here: %s\n",key );
+    // printf("key is here: %s\n",key );
 
     return 0;
 }

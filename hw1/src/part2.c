@@ -27,10 +27,10 @@ void decrept(char *array ,unsigned short postion);
 void tryPART2(unsigned short mode){
     char c;
     char d;
-    printf("key value:%s\n",key );
+    // printf("key value:%s\n",key );
     unsigned short type = mode >> 13;
     type = type & 0x0001;
-    printf("value type%x\n",type );
+    // printf("value type%x\n",type );
     if(key == NULL){
         putArray(polybius_table,polybius_alphabet);
     }
@@ -42,7 +42,7 @@ void tryPART2(unsigned short mode){
         //     i++;
         // }
     }
-    printf("enter a value: ");
+    // printf("enter a value: ");
     while((c = getchar())!= EOF){
         while(c != '\n' && c!= EOF){
             // printf("char: %c\n",c );
@@ -66,7 +66,7 @@ void tryPART2(unsigned short mode){
             c = getchar();
         }
         if (c != EOF && c != ' ' &&  c!='\t'){
-            printf("\nenter a value: ");
+            printf("\n");
         }
         else if(c == ' '){
             printf("%c",c);

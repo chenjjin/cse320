@@ -30,7 +30,6 @@ void tryPART3(unsigned short mode){
     //handle fm_key[] first
 
     if(key == NULL){
-        printf("key is null\n");
         fillfmKey(0);
     }
     else{
@@ -42,7 +41,7 @@ void tryPART3(unsigned short mode){
     type = type & 0x0001;
     // printf("value type%x\n",type );
 
-    printf("enter a value: ");
+    // printf("enter a value: ");
     while((c = getchar())!= EOF){
         tablePos=0;
         Flag=0;
@@ -59,6 +58,7 @@ void tryPART3(unsigned short mode){
 
     if (!type){
         if(c=='\n'){
+            // printf("this is table at last %s\n",table );
             if(*(table+1)!='\0'){
                 *(table+2)='x';
                 int FtableNumber=0;
@@ -80,7 +80,7 @@ void tryPART3(unsigned short mode){
     }
 
         if (c != EOF ){
-            printf("\nenter a value: ");
+            printf("\n");
         }
         else{
             return;
@@ -164,7 +164,7 @@ int decryptMorse(char c){
 
 
         }
-        // printf("this is table1: %s\n",table );
+         // printf("this is table1: %s\n",table );
         printf("%c",*(fm_key+FtableNumber));
 
         if(*(table+3)=='\0'){
@@ -195,9 +195,10 @@ int decryptMorse(char c){
             tablePos++;
         }
         }
+        d=3;
         tableSize = tableSize -3;
         FtableNumber = 0;
-        // printf("this is table2: %s\n",table );
+         // printf("this is table2: %s\n",table );
 
 
         // printf("TRANSFER NUMBER%d\n",FtableNumber);
@@ -304,11 +305,11 @@ void fillfmKey(int a){
      }
 
      else{
-        printf("you sholluld be heere\n" );
+        // printf("you sholluld be heere\n" );
         while(number <= 26 ){
             *(keyPosition+number) = *(fm_alphabet+number);
             number++;
         }
      }
-     printf("fm_key:%s\n", fm_key);
+     // printf("fm_key:%s\n", fm_key);
 }
