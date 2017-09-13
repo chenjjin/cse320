@@ -14,13 +14,15 @@
 #endif
 
 
-int handleMorseTable(char c);
+int decryptMorse(char c);
+void encryptMorse(char c);
 void fillfmKey(int a);
-
+void translate();
 
 
 int tablePos = 0;
 char* table = polybius_table;
+int Flag = 0 ;
 
 
 
@@ -35,16 +37,49 @@ void tryPART3(unsigned short mode){
         fillfmKey(1);
     }
     char c;
+
+    unsigned short type = mode >> 13;
+    type = type & 0x0001;
+    // printf("value type%x\n",type );
+
     printf("enter a value: ");
     while((c = getchar())!= EOF){
+        tablePos=0;
+        Flag=0;
         while(c != '\n' && c!= EOF){
-
-            handleMorseTable(c);
+            if (!type){
+                decryptMorse(c);
+            }
+            else{
+                encryptMorse(c);
+            }
 
             c = getchar();
         }
 
-        if (c != EOF && c != ' ' &&  c!='\t'){
+    if (!type){
+        if(c=='\n'){
+            if(*(table+1)!='\0'){
+                *(table+2)='x';
+                int FtableNumber=0;
+                while(FtableNumber<26){
+                    if(**(fractionated_table+FtableNumber) == *table){
+                        if(*(*(fractionated_table+FtableNumber)+1) == *(table+1)){
+                            if(*(*(fractionated_table+FtableNumber)+2) == *(table+2)){
+                            break;
+                            }
+                        }
+                    }
+                    FtableNumber++;
+                    // printf("%d",FtableNumber );
+                }
+        // printf("this is table1: %s\n",table );
+            printf("%c",*(fm_key+FtableNumber));
+            }
+        }
+    }
+
+        if (c != EOF ){
             printf("\nenter a value: ");
         }
         else{
@@ -55,7 +90,7 @@ void tryPART3(unsigned short mode){
     }
 }
 
-int handleMorseTable(char c){
+int decryptMorse(char c){
 
     char a = 33;
     int i = 0;
@@ -69,12 +104,17 @@ int handleMorseTable(char c){
     //put xx when space encounter
 
     if(c == 32 ){
+        if(!Flag){
         *(table+tablePos) = 'x';
         tablePos = tablePos+1;
+        Flag=1;
         return 1;
-
+        }
+    return 1;
     }
-
+    else{
+        Flag=0;
+    }
     //CHECK INPUT CHAR POSITION IN MORSE_TABLE
     while (a != c){
         i++;
@@ -111,7 +151,7 @@ int handleMorseTable(char c){
     // tablePos = 0;
     while(tableSize>=3){
         tablePos = 0;
-        while(FtableNumber<26){
+        while(FtableNumber<sizeof(fm_key)){
             if(**(fractionated_table+FtableNumber) == *table){
                 if(*(*(fractionated_table+FtableNumber)+1) == *(table+1)){
                     if(*(*(fractionated_table+FtableNumber)+2) == *(table+2)){
@@ -168,6 +208,69 @@ int handleMorseTable(char c){
 
 
     return 1;
+}
+
+
+void encryptMorse(char c){
+    //find the position of char
+    int fmNumber = 0;
+    while(*(fm_key+fmNumber) != c){
+        fmNumber++;
+    }
+    int n = 0; //start posiiton of the char in fractionated_table
+    while(*(*(fractionated_table+fmNumber)+n) != '\0'){
+        // printf("1\n");
+        if (*(*(fractionated_table+fmNumber)+n) == 'x'){
+            if (Flag){
+                printf(" ");
+                n++;
+                continue;
+            }
+            Flag = 1;
+            translate();
+            n++;
+            continue;
+        }
+        *(table+tablePos) = *(*(fractionated_table+fmNumber)+n);
+        tablePos++;
+        n++;
+        Flag = 0;
+    }
+
+}
+
+void translate(){
+    int tableNumber = 0;
+    int FratableNumber = 0;
+
+    while(FratableNumber < 89){
+        // printf("table:%s\n",table );
+        while(*(table+tableNumber)!='\0'){
+
+            if(*(table+tableNumber) == *(*(morse_table+FratableNumber)+tableNumber)){
+                tableNumber++;
+            }
+            else{
+                tableNumber = 0;
+                break;
+            }
+        }
+        if((*(table+tableNumber)=='\0') && *(*(morse_table+FratableNumber)+tableNumber) == '\0'){
+            tableNumber = 0;
+            while(*(table+tableNumber)!='\0'){
+                *(table+tableNumber)='\0';
+                tableNumber++;
+
+            }
+
+            break;
+        }
+        tableNumber = 0;
+        FratableNumber++;
+    }
+    tablePos = 0;
+    // printf("FratableNumber:%d\n",FratableNumber );
+    printf("%c",FratableNumber+33 );
 }
 
 void fillfmKey(int a){
