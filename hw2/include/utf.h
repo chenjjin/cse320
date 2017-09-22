@@ -10,9 +10,13 @@
 #define AS_BYTE(x) ((char*)x)
 #define AS_GLYF(x) ((utf8_glyph_t*)x)
 
-const char *STR_UTF16BE  = "UTF16BE";
-char *const STR_UTF16LE = "UTF16LE";
-char const *STR_UTF8  = "UTF8";
+ // const char *STR_UTF16BE  = "UTF16BE";
+ // const char * STR_UTF16LE = "UTF16LE";
+ // const char  *STR_UTF8  = "UTF8";
+
+extern const char *  STR_UTF16BE;
+ extern const char *   STR_UTF16LE ;
+ extern const char  *  STR_UTF8 ;
 
 typedef enum { UTF16LE = 0xFFFE, UTF16BE = 0xFEFF, UTF8 = 0xBFBBEF } format_t;
 
@@ -109,7 +113,7 @@ utf8_glyph_t utf8_four_byte_encode(code_point_t code_point);
 utf8_encoding_func_t get_utf8_encoding_function(size_t size);
 
 /* UTF8 Decoding Function Type, decoding functions and getter */
-typedef code_point_t (*utf8_decoding_func_t)(utf8_glyph_t);
+typedef code_point_t (*utf8_decoding_func_t)(utf8_glyph_t glyph);
 
 code_point_t utf8_one_byte_decode(utf8_glyph_t glyph);
 code_point_t utf8_two_byte_decode(utf8_glyph_t glyph);
@@ -141,7 +145,7 @@ size_t utf8_glyph_size_of_code_point(code_point_t code_point);
 
 void print_state();
 
-char *bom_to_string(format_t bom);
+const char *bom_to_string(format_t bom);
 
 size_t remaining_utf8_bytes(utf8_byte_t first_byte);
 
