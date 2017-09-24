@@ -27,7 +27,8 @@ parse_args(int argc, char *argv[])
 
   joined_argv = join_string_array(argc, argv);
   info("argc: %d argv: %s", argc, joined_argv);
-  free(joined_argv);
+  // free(joined_argv);
+  int checknegetiveone = 0;
 
   program_state = Calloc(1, sizeof(state_t));
   for (i = 0; optind < argc; ++i) {
@@ -35,21 +36,30 @@ parse_args(int argc, char *argv[])
     debug("%d optind: %d", i, optind);
     debug("%d optopt: %d", i, optopt);
     debug("%d argv[optind]: %s", i, argv[optind]);
+    int flag = optind;
     if ((option = getopt(argc, argv, "he:")) != -1) {
+      checknegetiveone = 1;
       switch (option) {
         case 'e': {
+          printf("%s\n","e" );
           info("Encoding Argument: %s", optarg);
           if ((program_state->encoding_to = determine_format(optarg)) == 0)
             // goto errorcase;
             print_state();
+          break;
 
         }
         case '?': {
-          if (optopt != 'h')
             fprintf(stderr, KRED "-%c is not a supported argument\n" KNRM,
                     optopt);
+            USAGE(argv[0]);
+          exit(1);
+
+          break;
+
         }
         case 'h':{
+          // printf("%s\n", "123");
           USAGE(argv[0]);
           exit(0);
         }
@@ -58,8 +68,13 @@ parse_args(int argc, char *argv[])
         }
       }
     }
-    elsif(argv[optind] != NULL)
+
+    elsif(argv[optind = flag] != NULL)
     {
+      if(!checknegetiveone){
+        USAGE(argv[0]);
+          exit(1);
+      }
       if (program_state->in_file == NULL) {
         program_state->in_file = argv[optind];
       }
@@ -67,6 +82,7 @@ parse_args(int argc, char *argv[])
       {
         program_state->out_file = argv[optind];
       }
+      print_state();
       optind++;
     }
   }

@@ -53,6 +53,7 @@ from_utf8_to_utf16be(int infile, int outfile)
   #endif
   write_to_bigendian(outfile, &bom, 2);
 
+  // utf8_buf.bytes[0].top_one.remaining = 1;
   while((bytes_read = read_to_bigendian(infile, &utf8_buf.bytes[0], 1)) > 0) {
     if((remaining_bytes = remaining_utf8_bytes(utf8_buf.bytes[0]))) {
       if((bytes_read = read_to_bigendian(infile, &utf8_buf.bytes[1], remaining_bytes)) < 0) {
