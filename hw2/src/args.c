@@ -23,10 +23,10 @@ parse_args(int argc, char *argv[])
 {
   int i;
   char option;
-  char *joined_argv;
+  // char *joined_argv;
 
-  joined_argv = join_string_array(argc, argv);
-  info("argc: %d argv: %s", argc, joined_argv);
+  // joined_argv = join_string_array(argc, argv);
+  // info("argc: %d argv: %s", argc, joined_argv);
   // free(joined_argv);
   int checknegetiveone = 0;
 
@@ -41,7 +41,7 @@ parse_args(int argc, char *argv[])
       checknegetiveone = 1;
       switch (option) {
         case 'e': {
-          printf("%s\n","e" );
+          // printf("%s\n","e" );
           info("Encoding Argument: %s", optarg);
           if ((program_state->encoding_to = determine_format(optarg)) == 0)
             // goto errorcase;
@@ -82,11 +82,11 @@ parse_args(int argc, char *argv[])
       {
         program_state->out_file = argv[optind];
       }
-      print_state();
+      // print_state();
       optind++;
     }
   }
-  free(joined_argv);
+  // free(joined_argv);
 }
 
 format_t

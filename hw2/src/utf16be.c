@@ -39,8 +39,52 @@ from_utf16be_to_utf16le(int infile, int outfile)
 int
 from_utf16be_to_utf8(int infile, int outfile)
 {
+   int ret = 0;
+  int bom;
+  utf8_glyph_t utf8_buf;
+  ssize_t bytes_read;
+  // size_t remaining_bytes;
+  size_t size_of_glyph;
+  code_point_t code_point;
+  utf16_glyph_t utf16_buf;
+
+  bom = UTF8;
+  #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+  reverse_bytes(&bom, 3);
+  #endif
+  write_to_bigendian(outfile, &bom, 3);
+
+  // utf8_buf.bytes[0].top_one.remaining = 1;
+  while((bytes_read = read_to_bigendian(infile, &utf16_buf.upper_bytes,2)) > 0) {
+    // if((remaining_bytes = remaining_utf8_bytes(utf8_buf.bytes[0]))) {
+    // if (!((utf16_buf.upper_bytes > 0xD800) && (utf16_buf.upper_bytes < 0xDBFF))){
+    //   code_point = utf16_glyph_to_code_point(&utf16_buf);
+    //   utf8_buf = code_point_to_utf8_glyph(code_point, &size_of_glyph);
+    //   write_to_bigendian(outfile, &utf8_buf, size_of_glyph);
+    //   continue;
+    // }
+    reverse_bytes(&(utf16_buf.upper_bytes), 2);
+    // reverse_bytes(&(utf16_buf.lower_bytes), 2);
+
+      // utf16_buf.lower_bytes='\0';
+      if(is_upper_surrogate_pair(utf16_buf)){
+
+        if((bytes_read = read_to_bigendian(infile, &utf16_buf.lower_bytes, 2)) < 0) {
+          break;
+      }
+         reverse_bytes(&(utf16_buf.lower_bytes), 2);
+     }
+    // code_point = get_utf8_decoding_function(remaining_bytes + 1)(utf8_buf);
+    // utf16_buf = utf16be_glyph_to_codepoint(code_point, &size_of_glyph);
+    code_point = utf16_glyph_to_code_point(&utf16_buf);
+    utf8_buf = code_point_to_utf8_glyph(code_point, &size_of_glyph);
+
+
+    write_to_bigendian(outfile, &utf8_buf, size_of_glyph);
+  }
+  ret = bytes_read;
+  return ret;
   /* TODO */
-  return infile+outfile;
 }
 
 utf16_glyph_t
@@ -68,3 +112,28 @@ code_point_to_utf16be_glyph(code_point_t code_point, size_t *size_of_glyph)
   }
   return ret;
 }
+
+// code_point_t
+// utf16be_glyph_to_codepoint(utf16_glyph_t ret, size_t *size_of_glyph)
+// {
+//   code_point_t code_point;
+//   memeset(&code_point, 0, sizeof code_point);
+//   if(is_code_point_surrogate(code_point)) {
+//     code_point -= 0x10000;
+//     ret.upper_bytes = (code_point >> 10) + 0xD800;
+//     ret.lower_bytes = (code_point & 0x3FF) + 0xDC00;
+//   #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+//     reverse_bytes(&ret.upper_bytes, 2);
+//     reverse_bytes(&ret.lower_bytes, 2);
+//   #endif
+//     *size_of_glyph = 4;
+//   }
+//   else {
+//     ret.upper_bytes |= code_point;
+//   #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+//     reverse_bytes(&ret.upper_bytes, 2);
+//   #endif
+//     *size_of_glyph = 2;
+//   }
+//   return code_point;
+// }
