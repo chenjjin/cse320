@@ -13,9 +13,12 @@ main(int argc, char *argv[])
   print_state();
   in_flags = O_RDONLY;
   out_flags = O_WRONLY | O_CREAT;
+
+
   infile = Open(program_state->in_file, in_flags);
   outfile = Open(program_state->out_file, out_flags);
   lseek(infile, program_state->bom_length, SEEK_SET); /* Discard BOM */
+
 
   get_encoding_function()(infile, outfile);
   if(program_state != NULL) {

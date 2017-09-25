@@ -30,6 +30,19 @@ parse_args(int argc, char *argv[])
   // free(joined_argv);
   int checknegetiveone = 0;
 
+  int a = 0;
+  int b = 0;
+  while (argv[3][a]!='\0'){
+  if (argv[3][a]==argv[4][a]){
+    b++;
+  }
+    a++;
+  }
+
+  if(a==b){
+    USAGE(argv[0]);
+    exit(EXIT_FAILURE);
+  }
   program_state = Calloc(1, sizeof(state_t));
   for (i = 0; optind < argc; ++i) {
     debug("%d opterr: %d", i, opterr);
