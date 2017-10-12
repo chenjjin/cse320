@@ -64,7 +64,7 @@
 */
 
 /* Struct for an allocated block header */
-typedef struct {
+typedef  struct {
     uint64_t      allocated : ALLOCATED_BITS;
     uint64_t         padded : PADDED_BITS;
     uint64_t     two_zeroes : TWO_ZEROES;

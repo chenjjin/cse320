@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <signal.h>
 #include "sfmm.h"
+#include <stdio.h>
 
 
 int find_list_index_from_size(int sz) {
@@ -25,10 +26,10 @@ Test(sf_memsuite_student, Malloc_an_Integer_check_freelist, .init = sf_mem_init,
 
 	/* There should be one block of size 4064 in list 3 */
 	free_list *fl = &seg_free_list[find_list_index_from_size(PAGE_SZ - (header->block_size << 4))];
-
+	 // printf("pagenumnber:%i\n", PAGE_SZ - (header->block_size << 4));
 	cr_assert_not_null(fl, "Free list is null");
-
 	cr_assert_not_null(fl->head, "No block in expected free list!");
+		// printf("%plook at me\n",fl->head->next );
 	cr_assert_null(fl->head->next, "Found more blocks than expected!");
 	cr_assert(fl->head->header.block_size << 4 == 4064);
 	cr_assert(fl->head->header.allocated == 0);
