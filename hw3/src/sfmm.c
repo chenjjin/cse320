@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <string.h>
 
 
 
@@ -29,6 +30,10 @@ void lower_coalesce(void* next_starting_adress);
 void* get_Prev(void* pointer);
 size_t get_Size(void* pointer);
 size_t get_Alloc(void* pointer);
+void upper_coalesce(void* ptr);
+size_t get_Padded(void* pointer);
+void check_valid(void* ptr);
+
 
 
 
@@ -131,8 +136,8 @@ void *sf_malloc(size_t size) {
 void lower_coalesce(void* next_starting_adress){
     sf_free_header* previous_Header= (sf_free_header*)get_Prev(next_starting_adress);
 
-    if(get_Alloc(previous_Header) == 0){
-        size_t whole_size = get_Size(next_starting_adress)+get_Size(previous_Header);
+    if(previous_Header->header.allocated == 0){
+        size_t whole_size = get_Size(next_starting_adress)+(previous_Header->header.block_size);
         removeFromList(next_starting_adress);
         next_starting_adress = previous_Header;
         set_free_header(next_starting_adress,whole_size);
@@ -362,10 +367,180 @@ size_t get_Alloc(void* pointer){
     return (*(unsigned int*)(pointer)) & 0x1;
 }
 
-void *sf_realloc(void *ptr, size_t size) {
-	return NULL;
+size_t get_Padded(void* pointer){
+    return ((*(unsigned int*)(pointer)) & 0x2)>>1 ;
+}
+
+size_t get_Request(void* pointer){
+    return ((*(unsigned long*)(pointer)) & 0xffffffff)>>32;
 }
 
 void sf_free(void *ptr) {
-	return;
+    if(ptr==NULL){
+        abort();
+    }
+    if(ptr<(void*)get_heap_start()||ptr>(void*)get_heap_end()){
+        abort();
+    }
+    if(get_Alloc((void*)ptr-8)==0){
+        abort();
+    }
+    // printf("first:%zd\n", get_Padded((void*)ptr-8));
+    // printf("second:%zd\n", get_Padded((void*)ptr+get_Size(ptr-8)-16));
+    if(get_Alloc((void*)ptr-8) != get_Alloc((void*)ptr+get_Size(ptr-8)-16)){
+        abort();
+    }
+    if(get_Padded((void*)ptr-8) != get_Alloc((void*)ptr+get_Size(ptr-8)-16)){
+        abort();
+    }
+
+    sf_footer* footer = ptr+get_Size(ptr-8)-16;
+    // printf("Third:%u\n", footer->requested_size);
+
+    if(footer->requested_size+16!=get_Size(ptr-8)){
+        if(get_Padded((void*)ptr-8)!=1){
+            abort();
+        }
+    }
+
+    ptr= (void*)ptr-8;
+    size_t size = get_Size(ptr);
+    set_free_header(ptr,size);
+    void* ptr_footer = (void*)ptr+size-8;
+    set_free_footer(ptr_footer,size);
+    insertToList(ptr);
+    upper_coalesce(ptr);
 }
+
+void upper_coalesce(void* ptr){
+    sf_free_header* pointer = (sf_free_header*)ptr;
+    size_t ptr_Size = pointer->header.block_size;
+    ptr_Size = ptr_Size<<4;
+    // printf("%zd\n",ptr_Size );
+    sf_free_header* next_Header = ptr + ptr_Size;
+
+    // sf_free_header* next_Header= (sf_free_header*)get_Next(ptr);
+    // printf("%u\n", );
+    if(next_Header->header.allocated == 0 ){
+        size_t whole_size = get_Size(ptr)+(next_Header->header.block_size<<4);
+
+        removeFromList(ptr);
+        removeFromList(next_Header);
+        set_free_header(ptr,whole_size);
+        set_free_footer((void*)ptr+whole_size-8,whole_size);
+        insertToList(ptr);
+    }
+}
+
+
+// void check_valid(void* ptr){
+//     if(ptr==NULL){
+//         abort();
+//     }
+//     if(ptr<(void*)get_heap_start()||ptr>(void*)get_heap_end()){
+//         abort();
+//     }
+//     if(get_Alloc((void*)ptr-8)==0){
+//         abort();
+//     }
+//     // printf("first:%zd\n", get_Padded((void*)ptr-8));
+//     // printf("second:%zd\n", get_Padded((void*)ptr+get_Size(ptr-8)-16));
+//     if(get_Alloc((void*)ptr-8) != get_Alloc((void*)ptr+get_Size(ptr-8)-16)){
+//         abort();
+//     }
+//     if(get_Padded((void*)ptr-8) != get_Alloc((void*)ptr+get_Size(ptr-8)-16)){
+//         abort();
+//     }
+
+//     sf_footer* footer = ptr+get_Size(ptr-8)-16;
+//     // printf("Third:%u\n", footer->requested_size);
+
+//     if(footer->requested_size+16!=get_Size(ptr-8)){
+//         if(get_Padded((void*)ptr-8)!=1){
+//             abort();
+//         }
+//     }
+// }
+void *sf_realloc(void *ptr, size_t size) {
+    if(ptr==NULL){
+        errno = EINVAL;
+        abort();
+    }
+    if(ptr<(void*)get_heap_start()||ptr>(void*)get_heap_end()){
+        errno = EINVAL;
+        abort();
+    }
+    if(get_Alloc((void*)ptr-8)==0){
+        errno = EINVAL;
+        abort();
+    }
+    // printf("first:%zd\n", get_Padded((void*)ptr-8));
+    // printf("second:%zd\n", get_Padded((void*)ptr+get_Size(ptr-8)-16));
+    if(get_Alloc((void*)ptr-8) != get_Alloc((void*)ptr+get_Size(ptr-8)-16)){
+        errno = EINVAL;
+        abort();
+    }
+    if(get_Padded((void*)ptr-8) != get_Padded((void*)ptr+get_Size(ptr-8)-16)){
+        errno = EINVAL;
+        abort();
+    }
+
+    sf_footer* footer = ptr+get_Size(ptr-8)-16;
+    // printf("Third:%u\n", footer->requested_size);
+
+    if(footer->requested_size+16!=get_Size(ptr-8)){
+        if(get_Padded((void*)ptr-8)!=1){
+            errno = EINVAL;
+            abort();
+        }
+    }
+
+    if(size == 0){
+        errno = EINVAL;
+        sf_free(ptr);
+        return NULL;
+    }
+    void* new_ptr;
+    size_t oldSize = get_Size((void*)ptr-8) ;
+    size_t make_padding =padding(size);
+    size_t get_padding_size= paddingSize(size);
+    size_t new_size = make_padding+16;
+    if(size>PAGE_SZ*4){
+        sf_errno = ENOMEM;
+        return NULL;
+    }
+    if(oldSize == new_size){
+        return ptr;
+    }
+    if(oldSize<new_size){
+        printf("new_size%zd\n",new_size );
+        new_ptr = sf_malloc(new_size-16);
+        if(new_ptr == NULL){
+            errno = ENOMEM;
+        }
+        memcpy(new_ptr,ptr,oldSize-16);
+        sf_free(ptr);
+        return new_ptr;
+
+    }
+    else if(oldSize>new_size){
+        if(oldSize-new_size <32){
+            set_Footer((void*)ptr-8+oldSize-8,oldSize,1,get_padding_size);
+            return ptr;
+        }
+        else{
+            set_Header((void*)ptr-8,new_size,0);
+            set_Footer((void*)ptr-8+new_size-8,new_size,0,get_padding_size);
+            void* new_free_ptr = (void*)ptr-8+new_size;
+            size_t new_free_size = oldSize-new_size;
+            set_free_header(new_free_ptr,new_free_size);
+            set_free_footer((void*)new_free_ptr+new_free_size-8,new_free_size);
+            insertToList(new_free_ptr);
+            upper_coalesce(new_free_ptr);
+            return ptr;
+        }
+    }
+
+    return NULL;
+}
+

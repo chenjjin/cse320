@@ -137,6 +137,7 @@ Test(sf_memsuite_student, realloc_larger_block, .init = sf_mem_init, .fini = sf_
 	cr_assert(fl->head->header.block_size << 4 == 32, "Free Block size not what was expected!");
 
 	sf_header *header = (sf_header*)((char*)x - 8);
+	printf("%i\n",header->block_size << 4 );
 	cr_assert(header->block_size << 4 == 64, "Realloc'ed block size not what was expected!");
 	cr_assert(header->allocated == 1, "Allocated bit is not set!");
 }

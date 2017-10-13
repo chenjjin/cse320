@@ -5,16 +5,15 @@ int main(int argc, char const *argv[]) {
 
 
     sf_mem_init();
-    sf_errno = 0;
-    sf_malloc(PAGE_SZ << 2);;
+    void *x = sf_malloc(sizeof(int) * 8);
+    void *y = sf_realloc(x, sizeof(char));
 
-    printf("sf_errno:%i",sf_errno);
+    // free_list *fl = &seg_free_list[0];
 
-    // sf_errno = 0;
-    // int *x = sf_malloc(sizeof(int));
-    // *x = 4;
-    // sf_snapshot();
-    // sf_blockprint((char*)x-8);
+    // sf_header *header = (sf_header*)((char*)x - 8);
+
+     sf_snapshot();
+     sf_blockprint((char*)y-8);
 
     // sf_varprint(x);
     //double* ptr = sf_malloc(sizeof(double));
