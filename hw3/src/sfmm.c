@@ -15,7 +15,7 @@ size_t padding(size_t size);
 size_t paddingSize(size_t size);
 void* first_fit(size_t total_size);
 
-void put_in(void* free_pointer,size_t total_size,int check_padding,size_t padding_size);
+void put_in(void* free_pointer,size_t total_size,int* check_padding,size_t padding_size);
 void set_Header(void* free_pointer,size_t free_size,size_t size_splinter);
 void set_Footer(void* pointer,size_t free_size,size_t size_splinter,size_t padding_size);
 
@@ -37,7 +37,9 @@ void check_valid(void* ptr);
 
 
 
-int check_padding = 0;
+int *check_padding;
+int b ;
+
 int spark_time=0;
 
 /**
@@ -58,7 +60,7 @@ int start = 0;
 void* starting_adress;
 
 void *sf_malloc(size_t size) {
-
+    check_padding = &b;
     void* free_pointer = NULL;
 
     if(size<=0 || size>PAGE_SZ*4){
@@ -169,7 +171,7 @@ size_t padding(size_t size){
         return size;
     }
     else{
-        check_padding = 1;
+        *check_padding = 1;
         return size+16-(size%16);
     }
 }
@@ -184,6 +186,7 @@ void* first_fit(size_t total_size){
     list_size = get_List_number(total_size);
 
     while(list_size <= 3){
+        // printf("123\n");
 
         for(top=seg_free_list[list_size].head; top!=NULL; top = top->next){
                 // printf("why\n" );
@@ -202,7 +205,7 @@ void* first_fit(size_t total_size){
 }
 
 //check splinter and arrange list
-void put_in(void* free_pointer,size_t total_size,int check_padding,size_t padding_size){
+void put_in(void* free_pointer,size_t total_size,int* check_padding,size_t padding_size){
     sf_free_header* free_p = (sf_free_header*)free_pointer;
     size_t total_free_number = free_p->header.block_size<<4;
     size_t remaining_free_size = total_free_number - total_size;
@@ -210,13 +213,19 @@ void put_in(void* free_pointer,size_t total_size,int check_padding,size_t paddin
     if(remaining_free_size<32){
         size_t size_splinter = total_free_number-total_size;
 
-        check_padding = 1;
+        *check_padding = 1;
+        if(remaining_free_size == 0){
+            *check_padding = 0;
+        }
         set_Header(free_pointer,total_free_number,size_splinter);
         set_Footer((void*)free_pointer+total_free_number-8,total_free_number,size_splinter,padding_size);
         removeFromList(free_pointer);
     }
     else{
         removeFromList(free_pointer);
+        if(padding_size == 0){
+            *check_padding = 0;
+        }
 
         set_Header((void*)free_pointer,total_size,padding_size);
         set_Footer((void*)free_pointer+total_size-8,total_size,0,padding_size);
@@ -234,7 +243,7 @@ void insertToList(void* new_free_pointer){
     sf_free_header* new_free = new_free_pointer;
 
     int listNumber = get_List_number((new_free->header.block_size)<<4);
-    //printf("here is next should be null:%p\n", seg_free_list[listNumber].head);
+    // printf("here is next should be null:%p\n", seg_free_list[listNumber].head);
     // printf("this is list heaf:%p \n",seg_free_list[listNumber].head );
 
     if(seg_free_list[listNumber].head == NULL){
@@ -324,11 +333,11 @@ void set_Header(void* free_pointer,size_t free_size,size_t size_splinter){
     header->allocated = 1;
 
     if(size_splinter == 0){
-        header->padded = check_padding;
+        header->padded = *check_padding;
     }
     else{
-        check_padding =1;
-        header->padded=check_padding;
+        *check_padding =1;
+        header->padded=*check_padding;
     }
     header->two_zeroes = 0;
     header->block_size = free_size>>4;
@@ -342,11 +351,11 @@ void set_Footer(void* pointer,size_t free_size,size_t size_splinter,size_t paddi
     footer->allocated = 1;
 
     if(size_splinter == 0){
-        footer->padded = check_padding;
+        footer->padded = *check_padding;
     }
     else{
-        check_padding = 1;
-        footer->padded  = check_padding;
+        *check_padding = 1;
+        footer->padded  = *check_padding;
     }
     footer->two_zeroes = 0;
     footer->block_size = free_size>>4;
@@ -410,6 +419,8 @@ void sf_free(void *ptr) {
 
     ptr= (void*)ptr-8;
     size_t size = get_Size(ptr);
+    // set_Header(ptr,0,0);
+    // set_Footer((void*)ptr+size-8,0,0,0);
     set_free_header(ptr,size);
     void* ptr_footer = (void*)ptr+size-8;
     set_free_footer(ptr_footer,size);
@@ -511,10 +522,11 @@ void *sf_realloc(void *ptr, size_t size) {
     size_t get_padding_size= paddingSize(size);
     size_t new_size = make_padding+16;
     if(size>PAGE_SZ*4){
-        sf_errno = ENOMEM;
+        sf_errno = EINVAL;
         return NULL;
     }
     if(oldSize == new_size){
+        set_Footer((void*)ptr-8+oldSize-8,oldSize,oldSize-new_size,get_padding_size);
         return ptr;
     }
     if(oldSize<new_size){
@@ -531,11 +543,18 @@ void *sf_realloc(void *ptr, size_t size) {
     }
     else if(oldSize>new_size){
         if(oldSize-new_size <32){
-            set_Footer((void*)ptr-8+oldSize-8,oldSize,1,get_padding_size);
+            // set_Header(ptr,oldSize,1);
+            set_Footer((void*)ptr-8+oldSize-8,oldSize,oldSize-new_size,get_padding_size);
             return ptr;
         }
         else{
-            set_Header((void*)ptr-8,new_size,0);
+            if(get_padding_size>0){
+                *check_padding = 1;
+            }
+            else{
+                *check_padding = 0;
+            }
+            set_Header((void*)ptr-8,new_size,get_padding_size);
             set_Footer((void*)ptr-8+new_size-8,new_size,0,get_padding_size);
             void* new_free_ptr = (void*)ptr-8+new_size;
             size_t new_free_size = oldSize-new_size;

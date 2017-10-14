@@ -5,7 +5,9 @@ int main(int argc, char const *argv[]) {
 
 
     sf_mem_init();
-    char *a = sf_malloc(4096);
+char* a = sf_malloc(16);
+sf_free(a);
+    // printf("sf_realloc size:::%i\n",*b );
     //void *y = sf_realloc(x, sizeof(char));
 
     // free_list *fl = &seg_free_list[0];
@@ -13,10 +15,8 @@ int main(int argc, char const *argv[]) {
     // sf_header *header = (sf_header*)((char*)x - 8);
 
      sf_snapshot();
-    sf_free(a);
      sf_blockprint((char*)a-8);
      // printf("hre%i\n", seg_free_list[3]->head);
-     sf_snapshot();
      // sf_free(x);
 
     // sf_varprint(x);
