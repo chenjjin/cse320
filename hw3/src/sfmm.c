@@ -120,7 +120,7 @@ void *sf_malloc(size_t size) {
                 set_free_footer((void*)next_starting_adress+PAGE_SZ-8,PAGE_SZ);
                 insertToList(next_starting_adress);
                 // sf_snapshot();
-                // lower_coalesce(next_starting_adress);
+                lower_coalesce(next_starting_adress);
 
             }
             else{
@@ -134,17 +134,22 @@ void *sf_malloc(size_t size) {
 
 }
 void lower_coalesce(void* next_starting_adress){
-    sf_free_header* previous_Header= (sf_free_header*)get_Prev(next_starting_adress);
+    sf_free_header* pointer = (sf_free_header*)next_starting_adress;
+    sf_free_header* previous_Footer= (void*)pointer-8;
+    size_t previous_size = previous_Footer->header.block_size<<4;
+    // printf("previous size%zd\n",previous_size );
+    sf_free_header* previous_Header = (void*)previous_Footer-previous_size+8;
 
     if(previous_Header->header.allocated == 0){
-        size_t whole_size = get_Size(next_starting_adress)+(previous_Header->header.block_size);
+        size_t whole_size = get_Size(next_starting_adress)+previous_size;
+        // printf("previous whole size%zd\n",whole_size );
+        removeFromList(previous_Header);
         removeFromList(next_starting_adress);
-        next_starting_adress = previous_Header;
-        set_free_header(next_starting_adress,whole_size);
-        set_free_footer((void*)next_starting_adress+whole_size-8,whole_size);
+        set_free_header((void*)previous_Header,whole_size);
+        set_free_footer((void*)previous_Header+whole_size-8,whole_size);
+        insertToList(previous_Header);
 
     }
-    insertToList(next_starting_adress);
 
 
 }
@@ -390,7 +395,7 @@ void sf_free(void *ptr) {
     if(get_Alloc((void*)ptr-8) != get_Alloc((void*)ptr+get_Size(ptr-8)-16)){
         abort();
     }
-    if(get_Padded((void*)ptr-8) != get_Alloc((void*)ptr+get_Size(ptr-8)-16)){
+    if(get_Padded((void*)ptr-8) != get_Padded((void*)ptr+get_Size(ptr-8)-16)){
         abort();
     }
 
@@ -513,13 +518,14 @@ void *sf_realloc(void *ptr, size_t size) {
         return ptr;
     }
     if(oldSize<new_size){
-        printf("new_size%zd\n",new_size );
-        new_ptr = sf_malloc(new_size-16);
+        // printf("new_size%zd\n",new_size );
+        new_ptr = sf_malloc(size);
         if(new_ptr == NULL){
             errno = ENOMEM;
         }
         memcpy(new_ptr,ptr,oldSize-16);
         sf_free(ptr);
+
         return new_ptr;
 
     }

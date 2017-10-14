@@ -137,7 +137,7 @@ Test(sf_memsuite_student, realloc_larger_block, .init = sf_mem_init, .fini = sf_
 	cr_assert(fl->head->header.block_size << 4 == 32, "Free Block size not what was expected!");
 
 	sf_header *header = (sf_header*)((char*)x - 8);
-	printf("%i\n",header->block_size << 4 );
+
 	cr_assert(header->block_size << 4 == 64, "Realloc'ed block size not what was expected!");
 	cr_assert(header->allocated == 1, "Allocated bit is not set!");
 }
@@ -186,4 +186,62 @@ Test(sf_memsuite_student, realloc_smaller_block_free_block, .init = sf_mem_init,
 //STUDENT UNIT TESTS SHOULD BE WRITTEN BELOW
 //DO NOT DELETE THESE COMMENTS
 //############################################
+
+
+Test(sf_memsuite_student, malloc_biggest_block, .init = sf_mem_init, .fini = sf_mem_fini) {
+	void *x = sf_malloc(4080+4096*3);
+
+	cr_assert_not_null(x, "x is NULL!");
+
+	sf_header *header = (sf_header*)((char*)x - 8);
+	cr_assert(header->block_size << 4 == 16384, "Block size not what was expected!");
+
+	free_list *fl = &seg_free_list[3];
+
+	cr_assert_null(fl->head, "there is block in expected free list!");
+}
+
+Test(sf_memsuite_student, free_malloc_biggest_block, .init = sf_mem_init, .fini = sf_mem_fini) {
+	void *x = sf_malloc(4080+4096*3);
+	sf_free(x);
+
+	// cr_assert_null(x, "x should be  NULL!");
+
+
+	free_list *fl = &seg_free_list[3];
+
+	cr_assert_not_null(fl->head, "there is block in expected free list!");
+	// printf("block_size:%i\n", fl->head->header.block_size);
+	cr_assert(fl->head->header.block_size<<4 == 4096*4,"free_list heve wrong block_size");
+}
+
+Test(sf_memsuite_student, coalescing_check, .init = sf_mem_init, .fini = sf_mem_fini) {
+	sf_malloc(10);
+	sf_malloc(10);
+	sf_malloc(10);
+
+	// cr_assert_null(x, "x should be  NULL!");
+
+	cr_assert_not_null(seg_free_list[3].head->header.block_size==(4096-32-32-32)>>4, "there is mistake in blocksize!");
+	// printf("block_size:%i\n", fl->head->header.block_size);
+	// cr_assert(fl->head->header.block_size<<4 == 4096*4,"free_list heve wrong block_size");
+}
+
+Test(sf_memsuite_student, header_check, .init = sf_mem_init, .fini = sf_mem_fini) {
+	void* x = sf_malloc(10);
+	sf_header* HEADER = (sf_header*)((void*)x-8);
+	cr_assert(HEADER->allocated==1,"header should allocated 1");
+
+}
+
+Test(sf_memsuite_student, padded_check, .init = sf_mem_init, .fini = sf_mem_fini) {
+	void* x = sf_malloc(10);
+	sf_header* HEADER = (sf_header*)((void*)x-8);
+	cr_assert(HEADER->allocated==1,"header should allocated 1");
+	cr_assert(HEADER->block_size==32>>4,"padding problem here");
+
+
+}
+
+
 
