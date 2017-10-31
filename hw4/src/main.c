@@ -11,7 +11,9 @@
 int main(int argc, char *argv[], char* envp[]) {
     char* input;
     bool exited = false;
+    char my_prompt[1024];
 
+    self_promp(my_prompt);
     if(!isatty(STDIN_FILENO)) {
         // If your shell is reading from a piped file
         // Don't have readline write anything to that file.
@@ -24,24 +26,29 @@ int main(int argc, char *argv[], char* envp[]) {
 
     do {
 
-        input = readline("> ");
+        input = readline(my_prompt);
 
-        write(1, "\e[s", strlen("\e[s"));
-        write(1, "\e[20;10H", strlen("\e[20;10H"));
-        write(1, "SomeText", strlen("SomeText"));
-        write(1, "\e[u", strlen("\e[u"));
+
+        // write(1, "\e[s", strlen("\e[s"));
+        // write(1, "\e[20;10H", strlen("\e[20;10H"));
+        // write(1, "SomeText", strlen("SomeText"));
+        // write(1, "\e[u", strlen("\e[u"));
 
         // If EOF is read (aka ^D) readline returns NULL
         if(input == NULL) {
             continue;
         }
 
+        if (eval(input,my_prompt) == -1){
+            break;
+        }
+
 
         // Currently nothing is implemented
-        printf(EXEC_NOT_FOUND, input);
+        // printf(EXEC_NOT_FOUND, input);
 
         // You should change exit to a "builtin" for your hw.
-        exited = strcmp(input, "exit") == 0;
+        // exited = strcmp(input, "exit") == 0;
 
         // Readline mallocs the space for input. You must free it.
         rl_free(input);
