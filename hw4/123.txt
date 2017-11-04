@@ -1,0 +1,4 @@
+help:Print a list of all builtins and their basic usage in a single column. 
+exit: Exits the shell 
+cd: Changes the current working directory of the shell
+pwd: Prints the absolute path of the current working directory.
