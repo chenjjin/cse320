@@ -15,6 +15,9 @@ int argc;
 char bufArray[1024];
 char *new_prompt;
 char previous_direc[1024];
+char color[10];
+char actual_color[4];
+
 
 int parseLine(char *buf, char **argv);
 int builtin_command(char** argv);
@@ -35,6 +38,7 @@ int check_less_brefore_greater(char* input);
 int check_greater_brefore_less(char* input);
 void execute_pipe(int in,int out,char** first_token_list);
 void handle_pipe(int array_size, char** directionList);
+int build_process_command(char** argv);
 
 
 int eval(char* input,char* prompt){
@@ -43,6 +47,7 @@ int eval(char* input,char* prompt){
     char* buf = strdup(input);
     new_prompt = prompt;
     argc = parseLine(buf, argv);
+    int return_value=0;
     if (argv[0] == NULL)
         return 0;
 
@@ -51,6 +56,9 @@ int eval(char* input,char* prompt){
     }
     else if (redirection_exist(input)){
         Redirection(input,argv);
+    }
+    else if(( return_value = build_process_command(argv)) > 1){
+        return return_value;
     }
     else if(builtin_command(argv)!=1){
         Executables(input,argv);
@@ -670,11 +678,20 @@ int builtin_command(char** argv){
         return 1;
 
     }
+    if(!strcmp(argv[0], "color")){
+        strcpy(color , "a");
+        strcpy(actual_color,argv[1]);
+        self_promp(new_prompt);
+
+        return 1;
+    }
 
     return 0;
 }
 
 void self_promp(char* mypromp){
+     // printf("\033[1;31m");
+    // *color = 0;
     char newPromp[1024];
     self_pwd(bufArray);
     strcpy(mypromp,bufArray);
@@ -693,6 +710,57 @@ void self_promp(char* mypromp){
     // char* token = strtok(mypromp, env);
     //  printf( "this is token: %s\n", token );
     strcat(mypromp," :: CHJJIN >>");
+    // printf("\033[0m");
+    if(!strcmp(color,"a")){
+        if(!strcmp(actual_color,"RED")){
+            strcpy(newPromp,mypromp);
+            strcpy(mypromp,"\e[1;31m");
+            strcat(mypromp,newPromp);
+            strcat(mypromp,"\e[m");
+        }
+        if(!strcmp(actual_color,"GRN")){
+            strcpy(newPromp,mypromp);
+            strcpy(mypromp,"\e[[1;32m");
+            strcat(mypromp,newPromp);
+            strcat(mypromp,"\e[m");
+        }
+        if(!strcmp(actual_color,"YEL")){
+            strcpy(newPromp,mypromp);
+            strcpy(mypromp,"\e[1;33m");
+            strcat(mypromp,newPromp);
+            strcat(mypromp,"\e[m");
+        }
+        if(!strcmp(actual_color,"BLU")){
+            strcpy(newPromp,mypromp);
+            strcpy(mypromp,"\e[1;34m");
+            strcat(mypromp,newPromp);
+            strcat(mypromp,"\e[m");
+        }
+        if(!strcmp(actual_color,"MAG")){
+            strcpy(newPromp,mypromp);
+            strcpy(mypromp,"\e[1;35m");
+            strcat(mypromp,newPromp);
+            strcat(mypromp,"\e[m");
+        }
+        if(!strcmp(actual_color,"CYN")){
+            strcpy(newPromp,mypromp);
+            strcpy(mypromp,"\e[1;36m");
+            strcat(mypromp,newPromp);
+            strcat(mypromp,"\e[m");
+        }
+        if(!strcmp(actual_color,"WHT")){
+            strcpy(newPromp,mypromp);
+            strcpy(mypromp,"\e[1;37m");
+            strcat(mypromp,newPromp);
+            strcat(mypromp,"\e[m");
+        }
+        if(!strcmp(actual_color,"BWN")){
+            strcpy(newPromp,mypromp);
+            strcpy(mypromp,"\e[0;33m");
+            strcat(mypromp,newPromp);
+            strcat(mypromp,"\e[m");
+        }
+    }
 }
 
 
@@ -776,4 +844,22 @@ void help_print(){
     printf("%s\n", "exit: Exits the shell ");
     printf("%s\n", "cd: Changes the current working directory of the shell");
     printf("%s\n", "pwd: Prints the absolute path of the current working directory.");
+}
+
+
+int build_process_command(char** argv){
+    if (!strcmp(argv[0], "jobs")) {
+        return 2;
+    }
+
+    if(!strcmp(argv[0], "fg")){
+        return 3;
+    }
+
+    if(!strcmp(argv[0], "kill")){
+        return 4;
+
+    }
+
+    return 0;
 }

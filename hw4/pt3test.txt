@@ -1,0 +1,16 @@
+.
+..
+123.txt
+456.txt
+bin
+build
+ filename.txt
+include
+Makefile
+Makefile.config
+output.txt
+out.txt
+pt3test.txt
+src
+testcmds.sf
+tests

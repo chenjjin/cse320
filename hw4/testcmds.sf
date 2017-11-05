@@ -1,1 +1,8 @@
-ls -al | grep txt
+help
+ls
+cd /
+pwd
+ls -al home
+cd -
+cat < testcmds.sf
+exit
