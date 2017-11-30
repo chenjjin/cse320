@@ -54,5 +54,27 @@ Test(queue_suite, 01_multithreaded, .timeout = 2, .init = queue_init, .fini = qu
         exit(EXIT_FAILURE);
 
     cr_assert_eq(num_items, NUM_THREADS, "Had %d items. Expected: %d", num_items, NUM_THREADS);
+
+    // queue_node_t  *a = global_queue->front;
+    // while(a!=NULL){
+    //     int *b = a->item;
+    //     printf("%d >", *b);
+    //     a = a->next;
+    // }
+    // printf("%s\n", "===================");
+
+
+    // dequeue(global_queue);
+    // a = global_queue->front;
+
+
+    // while(a!=NULL){
+    //     int *b = a->item;
+    //     printf("%d >", *b);
+    //     a = a->next;
+    // }
+
+    // sem_getvalue(&global_queue->items,&num_items);
+    // printf("num:%d\n", num_items);
 }
 

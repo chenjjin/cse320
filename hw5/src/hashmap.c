@@ -1,11 +1,40 @@
 #include "utils.h"
+#include <errno.h>
+
 
 #define MAP_KEY(base, len) (map_key_t) {.key_base = base, .key_len = len}
 #define MAP_VAL(base, len) (map_val_t) {.val_base = base, .val_len = len}
 #define MAP_NODE(key_arg, val_arg, tombstone_arg) (map_node_t) {.key = key_arg, .val = val_arg, .tombstone = tombstone_arg}
 
 hashmap_t *create_map(uint32_t capacity, hash_func_f hash_function, destructor_f destroy_function) {
-    return NULL;
+    hashmap_t *hashmap =  calloc(1,sizeof(hashmap_t));
+    if(hashmap == NULL){
+        errno = EINVAL;
+        return NULL;
+    }
+    if(hash_function == NULL){
+        errno = EINVAL;
+        return NULL;
+    }
+    if(destroy_function == NULL){
+        errno = EINVAL;
+        return NULL;
+    }
+    hashmap->capacity = capacity;
+    hashmap->size = 0;
+    hashmap->nodes = NULL;
+    hashmap->destroy_function = destroy_function;
+    hashmap->num_readers = 0;
+    if(pthread_mutex_init(&(hashmap->write_lock), NULL) != 0){
+        return NULL;
+        }
+    if(pthread_mutex_init(&(hashmap->fields_lock), NULL) != 0){
+        return NULL;
+    }
+    hashmap->invalid = false;
+
+
+    return hashmap;
 }
 
 bool put(hashmap_t *self, map_key_t key, map_val_t val, bool force) {

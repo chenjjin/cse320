@@ -17,6 +17,7 @@ char* input;
 pid_t processGroup[10];
 int return_result;
 char processName[10][10];
+int list[10];
 
 
 
@@ -83,11 +84,11 @@ int main(int argc, char *argv[], char* envp[]) {
         }
         if(return_result == 2){
             int size = 0;
-            while(processGroup[size]!=0){
+            while(list[size]!=0){
                 size++;
             }
             for(int i= 0;i<size;i++){
-                printf(JOBS_LIST_ITEM, processGroup[i],processName[i]);
+                printf(JOBS_LIST_ITEM, i,processName[i]);
             }
         }
         if(return_result == 3){
@@ -234,12 +235,12 @@ void handler(int sign){
     char string[10];
     int size = 0;
     int i = 1;
-    pid_t currennt_process = getpgrp();
+    // pid_t currennt_process = getpgrp();
     debug("this process id is %d\n",currennt_process );
-    while(processGroup[size]!=0){
+    while(list[size]!=0){
         size = size+1;
     }
-    processGroup[size] = currennt_process;
+    list[size] = size;
     while(input[i]!=' '){
         i++;
     }
