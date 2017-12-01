@@ -84,4 +84,52 @@ Test(map_suite, 02_multithreaded, .timeout = 2, .init = map_init, .fini = map_fi
 
     int num_items = global_map->size;
     cr_assert_eq(num_items, NUM_THREADS, "Had %d items in map. Expected %d", num_items, NUM_THREADS);
+
+
+
+//     map_node_t *current=global_map->nodes;
+//         printf("| key   | val    |\n" );
+//     for(int i=0;i<global_map->capacity;i++,current++){
+//         char *k=current->key.key_base;
+//         char *v=current->val.val_base;
+//         printf("| %d    |  %d    |\n",*k,*v );
+//     }
+//     printf("===================\n");
+//     int *key_ptr = malloc(sizeof(int));
+//     int *val_ptr = malloc(sizeof(int));
+//    //  void *val_ptr=malloc(sizeof(int));
+//    //  //printf("===========h======\n");
+//    //  val_ptr=get(global_map,MAP_KEY(key_ptr,sizeof(int))).val_base;
+//    // // printf("============key_ptr======\n");
+//    //  if(val_ptr==NULL)
+//    //      printf("hhh\n");
+//    //  else
+//    //  printf("value:%d\n",*((int*)val_ptr));
+//     for(int i=0;i<NUM_THREADS;i++){
+//     *key_ptr=i;
+//     delete(global_map,MAP_KEY(key_ptr,sizeof(int)));
+// }
+//     current=global_map->nodes;
+//         printf("| key   | val    | tombstone   |\n" );
+//     for(int i=0;i<global_map->capacity;i++,current++){
+//         char *k=current->key.key_base;
+//         char *v=current->val.val_base;
+//         //if(current->tombstone==false)
+//         printf("| %d    |  %d    |  %d   |\n",*k,*v,current->tombstone );
+//     }
+//     *key_ptr=4;
+//     *val_ptr=88;
+//     put(global_map,MAP_KEY(key_ptr,sizeof(int)),MAP_VAL(val_ptr,sizeof(int)),true);
+//     printf("********************************\n");
+//     current=global_map->nodes;
+//         printf("| key   | val    | tombstone   |\n" );
+//     for(int i=0;i<global_map->capacity;i++,current++){
+//         char *k=current->key.key_base;
+//         char *v=current->val.val_base;
+//         //if(current->tombstone==false)
+//         printf("| %d    |  %d    |  %d   |\n",*k,*v,current->tombstone );
+//     }
+
+
+
 }
