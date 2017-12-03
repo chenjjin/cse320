@@ -6,6 +6,9 @@
 #ifndef EXTRACREDIT_H
 #define EXTRACREDIT_H
 
+// #ifndef EC
+// #define EC
+
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdbool.h>
@@ -30,6 +33,7 @@ typedef struct map_node_t {
     map_key_t key;
     map_val_t val;
     bool tombstone;
+    struct map_node_t *next,*prev;
 } map_node_t;
 
 typedef struct hashmap_t {
@@ -42,7 +46,12 @@ typedef struct hashmap_t {
     pthread_mutex_t write_lock;
     pthread_mutex_t fields_lock;
     bool invalid;
+    map_node_t *first, *rear;
+
+
 } hashmap_t;
+
+
 
 /* **DO NOT** modify the function prototypes below */
 

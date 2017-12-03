@@ -74,15 +74,19 @@ void *dequeue(queue_t *self) {
         errno = EINVAL;
         return NULL;
     }
-    if(self->front == NULL){
-        errno = EINVAL;
-        return NULL;
-    }
-    pthread_mutex_lock(&self->lock);
+    // if(self->front == NULL){
+    //     errno = EINVAL;
+    //     return NULL;
+    // }
     sem_wait(&self->items);
+    pthread_mutex_lock(&self->lock);
+
     queue_node_t *removenode = self->front;
     queue_node_t *frontnode = self->front->item;
     self->front = self->front->next;
+    if(self->front == NULL){
+        self->rear=NULL;
+    }
     free(removenode);
 
     pthread_mutex_unlock(&self->lock);
