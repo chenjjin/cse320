@@ -96,11 +96,11 @@ void *thread(void *vargp) {
         }
         else{
 
-            map_key_t key;
-            map_val_t val;
+
             void *key_base = malloc(4);
             void *val_base = malloc(4);
-
+            map_key_t key;
+            map_val_t val;
 
 
             // printf("connfd %d\n",connfd);
@@ -111,10 +111,8 @@ void *thread(void *vargp) {
 
             key.key_len =request_thead->key_size ;
             val.val_len = request_thead->value_size;
-            val.val_base = val_base;
-
             key.key_base = key_base;
-    // printf("hello\n");
+            val.val_base = val_base;
 
 
 
@@ -125,7 +123,6 @@ void *thread(void *vargp) {
                 Rio_writen(connfd,response_head,sizeof(response_header_t));
                 free(request_thead);
                 free(response_head);
-    // printf("hello111\n");
 
             }
             else{
@@ -148,20 +145,16 @@ void *thread(void *vargp) {
             response_head->value_size = 0;
             Rio_writen(connfd,response_head,sizeof(response_header_t));
         }
-    // printf("hello\n");
 
         else{
-                        map_val_t val;
-
             map_key_t key;
+            map_val_t val;
             void *key_base = malloc(sizeof(4));
 
             Rio_readn(connfd,key_base,request_thead->key_size);
             key.key_len =request_thead->key_size ;
             val.val_len = request_thead->value_size;
-
             key.key_base = key_base;
-
             val = get(hashmap,key);
             if(val.val_base == NULL){
                 response_head->response_code = NOT_FOUND;
@@ -176,8 +169,6 @@ void *thread(void *vargp) {
             }
         }
     }
-
-
 
 
     else if(request_thead->request_code == EVICT){
