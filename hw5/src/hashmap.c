@@ -14,37 +14,39 @@ hashmap_t *create_map(uint32_t capacity, hash_func_f hash_function, destructor_f
         errno = EINVAL;
         return NULL;
     }
-    if(hash_function == NULL){
+    else if(hash_function == NULL){
         errno = EINVAL;
         return NULL;
     }
-    if(destroy_function == NULL){
+    else if(destroy_function == NULL){
         errno = EINVAL;
         return NULL;
     }
+        hashmap->size = 0;
+
     hashmap->capacity = capacity;
-    hashmap->size = 0;
     hashmap->nodes = calloc(capacity,sizeof(map_node_t));
-    for(int i  = 0 ; i < capacity ; i++){
-        hashmap->nodes[i].key.key_base = NULL;
-        hashmap->nodes[i].key.key_len = 0;
-        hashmap->nodes[i].tombstone = false;
-        hashmap->nodes[i].val.val_base = NULL;
-        hashmap->nodes[i].val.val_len = 0;
-
-
+    int n=0;
+    while( n < capacity){
+        hashmap->nodes[n].key.key_base = NULL;
+        hashmap->nodes[n].key.key_len = 0;
+        hashmap->nodes[n].tombstone = false;
+        hashmap->nodes[n].val.val_base = NULL;
+        hashmap->nodes[n].val.val_len = 0;
+        n=n+1;
 
     }
     hashmap->hash_function=hash_function;
     hashmap->destroy_function = destroy_function;
     hashmap->num_readers = 0;
+    hashmap->invalid = false;
+
     if(pthread_mutex_init(&(hashmap->write_lock), NULL) != 0){
         return NULL;
         }
     if(pthread_mutex_init(&(hashmap->fields_lock), NULL) != 0){
         return NULL;
     }
-    hashmap->invalid = false;
 
 
     return hashmap;
@@ -159,13 +161,14 @@ map_node_t delete(hashmap_t *self, map_key_t key) {
         if((self->nodes+index)->key.key_len == key.key_len
                && memcmp((self->nodes+index)->key.key_base,key.key_base,key.key_len) == 0){
 
-            if((self->nodes+index)->tombstone == true){
+            if((self->nodes+index)->tombstone){
                 pthread_mutex_unlock(&self->write_lock);
 
                 return MAP_NODE(MAP_KEY(NULL, 0), MAP_VAL(NULL, 0), false);
             }
             (self->nodes+index)->tombstone = true;
-            self->size--;
+            self->size = self->size - 1;
+
             pthread_mutex_unlock(&self->write_lock);
 
             return MAP_NODE((self->nodes+index)->key, (self->nodes+index)->val, true);
@@ -190,6 +193,7 @@ bool clear_map(hashmap_t *self) {
     while(index < self->capacity){
         if((self->nodes+index)->key.key_base!=NULL){
             (self->nodes+index)->tombstone = false;
+            (self->nodes+index)->key.key_base=NULL;
             self->destroy_function((self->nodes+index)->key,(self->nodes+index)->val);
             // self->size--;
         }
@@ -209,6 +213,7 @@ bool invalidate_map(hashmap_t *self) {
     uint32_t index = 0;
     while(index < self->capacity){
         if((self->nodes+index)->key.key_base!=NULL){
+            (self->nodes+index)->key.key_base=NULL;
             self->destroy_function((self->nodes+index)->key,(self->nodes+index)->val);
 
         }

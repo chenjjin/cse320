@@ -4,7 +4,6 @@
 #include "queue.h"
 
 
-#define NTHREADS 1
 
 void echo_cnt(int connfd);
 void destroy_function(map_key_t key, map_val_t val);
@@ -15,8 +14,10 @@ void help();
 queue_t* queue;
 hashmap_t *hashmap;
 int main(int argc, char *argv[]) {
+    signal(SIGPIPE, SIG_IGN);
+
     int i, listenfd, connfd;
-    socklen_t clientlen;//=sizeof(struct sockaddr_in);
+    socklen_t clientlen;
     struct sockaddr_storage clientaddr;
     pthread_t tid;
     // char help[2] = "-h";
@@ -44,8 +45,8 @@ int main(int argc, char *argv[]) {
     queue = create_queue();
     hashmap  = create_map(num,jenkins_one_at_a_time_hash,destroy_function);
     listenfd = Open_listenfd(argv[2]);
-
-    for (i = 0; i < NTHREADS; i++)  /* Create worker threads */
+    int n1=atoi(argv[1]);
+    for (i = 0; i < n1; i++)  /* Create worker threads */
         Pthread_create(&tid, NULL, thread, NULL);
 
         while (1) {
@@ -64,7 +65,7 @@ void *thread(void *vargp) {
     //sem_getvalue(&queue->items,&num_item);
     while (1) {
     num_item = (int*)(dequeue(queue));
-     printf("123\n");
+     // printf("123\n");
     int connfd = *num_item; /* Remove connfd from buffer */
      // if(num_item !=0){
     echo_cnt(connfd); /* Service client */
@@ -102,16 +103,17 @@ void *thread(void *vargp) {
             map_val_t val;
 
 
-            printf("connfd %d\n",connfd);
+            // printf("connfd %d\n",connfd);
 
             Rio_readn(connfd,key_base,request_thead->key_size);
             Rio_readn(connfd,val_base,request_thead->value_size);
-            printf("key_base %d\n",*(int*)key_base );
+            // printf("key_base %d\n",*(int*)key_base );
 
             key.key_len =request_thead->key_size ;
             val.val_len = request_thead->value_size;
             key.key_base = key_base;
             val.val_base = val_base;
+    // printf("hello\n");
 
 
 
@@ -122,14 +124,16 @@ void *thread(void *vargp) {
                 Rio_writen(connfd,response_head,sizeof(response_header_t));
                 free(request_thead);
                 free(response_head);
+    // printf("hello\n");
 
             }
-
-            response_head->response_code = OK;
-            response_head->value_size = 0;
-            Rio_writen(connfd,response_head,sizeof(response_header_t));
-            free(request_thead);
-            free(response_head);
+            else{
+                response_head->response_code = OK;
+                response_head->value_size = 0;
+                Rio_writen(connfd,response_head,sizeof(response_header_t));
+                free(request_thead);
+                free(response_head);
+            }
         }
 
     }
@@ -143,16 +147,19 @@ void *thread(void *vargp) {
             response_head->value_size = 0;
             Rio_writen(connfd,response_head,sizeof(response_header_t));
         }
+    // printf("hello\n");
 
         else{
+                        map_val_t val;
+
             map_key_t key;
-            map_val_t val;
             void *key_base = malloc(sizeof(4));
 
             Rio_readn(connfd,key_base,request_thead->key_size);
             key.key_len =request_thead->key_size ;
             val.val_len = request_thead->value_size;
             key.key_base = key_base;
+
             val = get(hashmap,key);
             if(val.val_base == NULL){
                 response_head->response_code = NOT_FOUND;
@@ -167,6 +174,8 @@ void *thread(void *vargp) {
             }
         }
     }
+
+
 
 
     else if(request_thead->request_code == EVICT){

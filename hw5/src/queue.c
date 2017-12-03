@@ -84,6 +84,7 @@ void *dequeue(queue_t *self) {
     queue_node_t *removenode = self->front;
     queue_node_t *frontnode = self->front->item;
     self->front = self->front->next;
+
     if(self->front == NULL){
         self->rear=NULL;
     }
